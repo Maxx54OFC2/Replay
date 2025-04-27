@@ -155,7 +155,6 @@ local startTime = 0
 local elapsedTime = 0
 local heartbeatConnection
 local replayConnection
-local wheelNames = {"FR", "FL", "RL", "RR"}
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -190,8 +189,8 @@ local function getChassis(car)
 	return car and car:FindFirstChild("VehicleSeat", true)
 end
 
--- Função para gravar ações das rodas
-local function recordWheelActions()
+-- Função para gravar ações do chassi
+local function recordChassisActions()
 	local car = getPlayerCar()
 	if not car then
 		playButton.Text = "No Car!"
@@ -216,57 +215,10 @@ local function recordWheelActions()
 		return
 	end
 
-	local wheelsFolder = car:FindFirstChild("Wheels")
-	if not wheelsFolder then
-		playButton.Text = "No Wheels!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
-		isRecording = false
-		if heartbeatConnection then
-			heartbeatConnection:Disconnect()
-		end
-		return
-	end
-
-	local wheelData = {}
-	local allWheelsFound = true
-	for _, wheelName in ipairs(wheelNames) do
-		local wheel = wheelsFolder:FindFirstChild(wheelName)
-		if wheel then
-			local constraint = wheel:FindFirstChildWhichIsA("CylindricalConstraint") or wheel:FindFirstChildWhichIsA("HingeConstraint")
-			if constraint then
-				-- Gravar CFrame relativo ao chassi
-				local relativeCFrame = chassis.CFrame:ToObjectSpace(wheel.CFrame)
-				wheelData[wheelName] = {
-					relativeCFrame = relativeCFrame,
-					angularVelocity = constraint.AngularVelocity
-				}
-			else
-				allWheelsFound = false
-				break
-			end
-		else
-			allWheelsFound = false
-			break
-		end
-	end
-
-	if not allWheelsFound then
-		playButton.Text = "Invalid Wheels!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
-		isRecording = false
-		if heartbeatConnection then
-			heartbeatConnection:Disconnect()
-		end
-		return
-	end
-
 	local currentTime = tick() - startTime
 	table.insert(recordings, {
 		time = currentTime,
-		wheelData = wheelData,
-		chassisCFrame = chassis.CFrame -- Gravar CFrame do chassi
+		cframe = chassis.CFrame
 	})
 end
 
@@ -281,12 +233,12 @@ local function duplicateCar()
 	carCopy.Name = "ReplayCar"
 	for _, part in pairs(carCopy:GetDescendants()) do
 		if part:IsA("BasePart") then
-			part.Anchored = false
+			part.Anchored = true -- Ancorrar todas as partes
 			part.CanCollide = false -- Evita colisões
 		elseif part:IsA("VehicleSeat") then
 			part.Disabled = true -- Desativa controle
-		elseif part:IsA("BodyVelocity") or part:IsA("BodyGyro") then
-			part:Destroy() -- Remove controles de física
+		elseif part:IsA("BodyVelocity") or part:IsA("BodyGyro") or part:IsA("CylindricalConstraint") or part:IsA("HingeConstraint") then
+			part:Destroy() -- Remove controles de física e constraints
 		end
 	end
 	carCopy.Parent = car.Parent
@@ -304,8 +256,8 @@ local function destroyReplayCar()
 	end
 end
 
--- Função para reproduzir as gravações nas rodas
-local function replayWheelActions()
+-- Função para reproduzir as gravações no chassi (ancorado)
+local function replayChassisActions()
 	if #recordings == 0 then
 		replayButton.Text = "No Data!"
 		task.wait(1)
@@ -330,79 +282,13 @@ local function replayWheelActions()
 		return
 	end
 
-	local wheelsFolder = carCopy:FindFirstChild("Wheels")
-	if not wheelsFolder then
-		replayButton.Text = "No Wheels!"
-		task.wait(1)
-		replayButton.Text = "Replay"
-		carCopy:Destroy()
-		return
-	end
-
-	local wheels = {}
-	local allWheelsFound = true
-	for _, wheelName in ipairs(wheelNames) do
-		local wheel = wheelsFolder:FindFirstChild(wheelName)
-		if wheel then
-			local constraint = wheel:FindFirstChildWhichIsA("CylindricalConstraint") or wheel:FindFirstChildWhichIsA("HingeConstraint")
-			if constraint then
-				wheels[wheelName] = { part = wheel, constraint = constraint }
-			else
-				allWheelsFound = false
-				break
-			end
-		else
-			allWheelsFound = false
-			break
-		end
-	end
-
-	if not allWheelsFound then
-		replayButton.Text = "Invalid Wheels!"
-		task.wait(1)
-		replayButton.Text = "Replay"
-		carCopy:Destroy()
-		return
-	end
-
-	-- Ancorrar o chassi temporariamente
-	chassis.Anchored = true
-
-	-- Posicionar o chassi no CFrame inicial
-	local initialChassisCFrame = recordings[1].chassisCFrame
-	if initialChassisCFrame then
-		chassis.CFrame = initialChassisCFrame
-	end
-
-	-- Posicionar as rodas no primeiro frame
-	local firstFrame = recordings[1]
-	for _, wheelName in ipairs(wheelNames) do
-		local wheel = wheels[wheelName]
-		local wheelData = firstFrame.wheelData[wheelName]
-		if wheel and wheelData then
-			wheel.part.CFrame = chassis.CFrame * wheelData.relativeCFrame
-			wheel.constraint.AngularVelocity = 0 -- Inicializar com 0 para estabilidade
-		end
-	end
-
-	-- Aguardar um frame para estabilizar
-	task.wait()
-
-	-- Liberar o chassi
-	chassis.Anchored = false
-
 	local startReplayTime = tick()
 	local index = 1
 
 	replayConnection = RunService.Heartbeat:Connect(function()
 		local currentTime = tick() - startReplayTime
 		if index > #recordings then
-			-- Congelar o carro no final
-			for _, part in pairs(carCopy:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.Anchored = true
-				end
-			end
+			-- O carro já está ancorado, então apenas parar o replay
 			if replayConnection then
 				replayConnection:Disconnect()
 			end
@@ -418,20 +304,9 @@ local function replayWheelActions()
 		local t = (currentTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
 		t = math.clamp(t, 0, 1)
 
-		for _, wheelName in ipairs(wheelNames) do
-			local wheel = wheels[wheelName]
-			local prevData = prevFrame.wheelData[wheelName]
-			local nextData = nextFrame.wheelData[wheelName]
-			if prevData and nextData and wheel then
-				-- Interpolar CFrame relativo e aplicar ao espaço mundial
-				local lerpedRelativeCFrame = prevData.relativeCFrame:Lerp(nextData.relativeCFrame, t)
-				local lerpedAngularVelocity = prevData.angularVelocity + (nextData.angularVelocity - prevData.angularVelocity) * t
-				-- Limitar AngularVelocity para evitar picos
-				lerpedAngularVelocity = math.clamp(lerpedAngularVelocity, -100, 100)
-				wheel.part.CFrame = chassis.CFrame * lerpedRelativeCFrame
-				wheel.constraint.AngularVelocity = lerpedAngularVelocity
-			end
-		end
+		-- Interpolar o CFrame do chassi
+		local lerpedCFrame = prevFrame.cframe:Lerp(nextFrame.cframe, t)
+		chassis.CFrame = lerpedCFrame
 	end)
 end
 
@@ -450,7 +325,7 @@ playButton.MouseButton1Click:Connect(function()
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
 		heartbeatConnection = RunService.Heartbeat:Connect(function()
-			recordWheelActions()
+			recordChassisActions()
 			updateTimeLabel()
 		end)
 		playButton.Text = "Stop"
@@ -489,5 +364,5 @@ replayButton.MouseButton1Click:Connect(function()
 	end
 	-- Destruir qualquer cópia existente antes de iniciar um novo replay
 	destroyReplayCar()
-	replayWheelActions()
+	replayChassisActions()
 end)
