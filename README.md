@@ -265,7 +265,8 @@ local function recordWheelActions()
 	local currentTime = tick() - startTime
 	table.insert(recordings, {
 		time = currentTime,
-		wheelData = wheelData
+		wheelData = wheelData,
+		chassisCFrame = chassis.CFrame -- Gravar CFrame do chassi
 	})
 end
 
@@ -362,6 +363,12 @@ local function replayWheelActions()
 		replayButton.Text = "Replay"
 		carCopy:Destroy()
 		return
+	end
+
+	-- Posicionar o chassi no CFrame inicial
+	local initialChassisCFrame = recordings[1].chassisCFrame
+	if initialChassisCFrame then
+		chassis.CFrame = initialChassisCFrame
 	end
 
 	local startReplayTime = tick()
