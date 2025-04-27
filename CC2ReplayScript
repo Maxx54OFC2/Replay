@@ -10,6 +10,11 @@ local carsReplayFolder = Instance.new("Folder")
 carsReplayFolder.Name = "CarsReplay"
 carsReplayFolder.Parent = ReplicatedStorage
 
+-- Criar pasta TempDebris no Workspace para peças soltas
+local tempDebrisFolder = Instance.new("Folder")
+tempDebrisFolder.Name = "TempDebris"
+tempDebrisFolder.Parent = Workspace
+
 -- Criar ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = playerGui
@@ -245,6 +250,7 @@ local isPaused = false
 local isLooping = false
 local playbackSpeed = 1.0
 local activeReplays = {} -- Tabela para armazenar replays ativos
+local trackedParts = {} -- Tabela para rastrear partes e peças soltas
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -266,7 +272,31 @@ local function getPlayerCar()
 	return nil
 end
 
--- Função para gravar ações de todas as partes
+-- Função para detectar peças soltas no Workspace
+local function detectDebris(car)
+	local debrisParts = {}
+	local carPosition = car and car.PrimaryPart and car.PrimaryPart.Position or Vector3.new(0, 0, 0)
+	for _, part in pairs(Workspace:GetChildren()) do
+		if part:IsA("BasePart") and part ~= car and not part:IsDescendantOf(car) and not part:IsDescendantOf(tempDebrisFolder) then
+			-- Considerar peças próximas ao carro (ex.: dentro de 50 studs)
+			local distance = (part.Position - carPosition).Magnitude
+			if distance < 50 and not trackedParts[part] then
+				-- Clonar a peça para TempDebris
+				local partClone = part:Clone()
+				partClone.Name = "Debris_" .. #trackedParts
+				partClone.Parent = tempDebrisFolder
+				partClone.Anchored = true
+				partClone.CanCollide = false
+				trackedParts[part] = partClone
+				trackedParts[partClone] = true
+				debrisParts[partClone] = true
+			end
+		end
+	end
+	return debrisParts
+end
+
+-- Função para gravar ações de todas as partes e peças soltas
 local function recordAllPartsActions()
 	local car = getPlayerCar()
 	if not car then
@@ -282,12 +312,37 @@ local function recordAllPartsActions()
 
 	local partsData = {}
 	local partIndex = {}
+	-- Gravar partes do carro
 	for _, part in pairs(car:GetDescendants()) do
 		if part:IsA("BasePart") then
 			local partName = part.Name
 			partIndex[partName] = (partIndex[partName] or 0) + 1
-			local uniqueId = partName .. "_" .. partIndex[partName]
-			partsData[uniqueId] = part.CFrame
+			local uniqueId = "Car_" .. partName .. "_" .. partIndex[partName]
+			partsData[uniqueId] = {
+				CFrame = part.CFrame,
+				isActive = true
+			}
+		end
+	end
+
+	-- Detectar e gravar peças soltas
+	local debrisParts = detectDebris(car)
+	for partClone, _ in pairs(debrisParts) do
+		local uniqueId = "Debris_" .. partClone.Name
+		partsData[uniqueId] = {
+			CFrame = partClone.CFrame,
+			isActive = true
+		}
+	end
+
+	-- Verificar peças rastreadas para marcar como inativas se desaparecerem
+	for originalPart, partClone in pairs(trackedParts) do
+		if typeof(originalPart) == "Instance" and not originalPart.Parent then
+			local uniqueId = "Debris_" .. partClone.Name
+			partsData[uniqueId] = {
+				CFrame = partClone.CFrame,
+				isActive = false
+			}
 		end
 	end
 
@@ -353,13 +408,15 @@ local function saveCarModel()
 	return carCopy
 end
 
--- Função para destruir todas as cópias do carro no Workspace
+-- Função para destruir todas as cópias do carro e peças no Workspace
 local function destroyAllClones()
 	for _, obj in pairs(Workspace:GetChildren()) do
-		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") then
+		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") or obj.Name == "DebrisClone" or obj.Name:match("^DebrisClone%d+$") then
 			obj:Destroy()
 		end
 	end
+	tempDebrisFolder:ClearAllChildren()
+	trackedParts = {}
 	for _, replay in pairs(activeReplays) do
 		if replay.connection then
 			replay.connection:Disconnect()
@@ -368,12 +425,13 @@ local function destroyAllClones()
 	activeReplays = {}
 end
 
--- Função para duplicar o carro (para replays)
-local function duplicateCar(carModel)
+-- Função para duplicar o carro e criar clones de peças soltas
+local function duplicateCarAndDebris(carModel, recordedParts)
 	if not carModel then
-		return nil
+		return nil, nil
 	end
 
+	-- Clonar o carro
 	local carCopy = carModel:Clone()
 	local cloneCount = 0
 	local existingClones = {}
@@ -400,7 +458,41 @@ local function duplicateCar(carModel)
 		end
 	end
 	carCopy.Parent = Workspace
-	return carCopy
+
+	-- Clonar peças soltas
+	local debrisClones = {}
+	local debrisCloneCount = 0
+	local existingDebrisClones = {}
+	for _, obj in pairs(Workspace:GetChildren()) do
+		if obj.Name == "DebrisClone" or obj.Name:match("^DebrisClone%d+$") then
+			existingDebrisClones[obj.Name] = true
+			if obj.Name:match("^DebrisClone(%d+)$") then
+				local num = tonumber(obj.Name:match("^DebrisClone(%d+)$"))
+				debrisCloneCount = math.max(debrisCloneCount, num + 1)
+			else
+				debrisCloneCount = math.max(debrisCloneCount, 1)
+			end
+		end
+	end
+
+	for uniqueId, _ in pairs(recordedParts) do
+		if uniqueId:match("^Debris_") then
+			-- Encontrar a peça original em TempDebris
+			local debrisName = uniqueId:match("^Debris_(.+)$")
+			local originalDebris = tempDebrisFolder:FindFirstChild(debrisName)
+			if originalDebris then
+				local debrisCopy = originalDebris:Clone()
+				debrisCopy.Name = not existingDebrisClones["DebrisClone"] and debrisCloneCount == 0 and "DebrisClone" or "DebrisClone" .. debrisCloneCount
+				debrisCopy.Anchored = true
+				debrisCopy.CanCollide = false
+				debrisCopy.Parent = Workspace
+				debrisClones[uniqueId] = debrisCopy
+				debrisCloneCount = debrisCloneCount + 1
+			end
+		end
+	end
+
+	return carCopy, debrisClones
 end
 
 -- Função para reproduzir as gravações em um clone específico
@@ -412,7 +504,9 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		return
 	end
 
-	local carCopy = duplicateCar(carModel)
+	-- Obter partes gravadas no primeiro frame para clonar peças soltas
+	local recordedParts = recordingsToPlay[1].parts
+	local carCopy, debrisClones = duplicateCarAndDebris(carModel, recordedParts)
 	if not carCopy then
 		replayButton.Text = "No Car!"
 		task.wait(1)
@@ -426,9 +520,12 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		if part:IsA("BasePart") then
 			local partName = part.Name
 			partIndex[partName] = (partIndex[partName] or 0) + 1
-			local uniqueId = partName .. "_" .. partIndex[partName]
+			local uniqueId = "Car_" .. partName .. "_" .. partIndex[partName]
 			partsMap[uniqueId] = part
 		end
+	end
+	for uniqueId, debrisPart in pairs(debrisClones) do
+		partsMap[uniqueId] = debrisPart
 	end
 
 	if next(partsMap) == nil then
@@ -436,11 +533,15 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		task.wait(1)
 		replayButton.Text = "Replay"
 		carCopy:Destroy()
+		for _, debrisPart in pairs(debrisClones) do
+			debrisPart:Destroy()
+		end
 		return
 	end
 
 	local replayData = {
 		carCopy = carCopy,
+		debrisClones = debrisClones,
 		partsMap = partsMap,
 		recordings = recordingsToPlay,
 		startTime = os.clock(),
@@ -463,6 +564,22 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 					replayData.startTime = os.clock()
 					replayData.pausedTime = 0
 					adjustedTime = 0
+					-- Restaurar peças soltas para o loop
+					for uniqueId, debrisPart in pairs(replayData.debrisClones) do
+						if not debrisPart.Parent then
+							local debrisName = uniqueId:match("^Debris_(.+)$")
+							local originalDebris = tempDebrisFolder:FindFirstChild(debrisName)
+							if originalDebris then
+								local newDebrisCopy = originalDebris:Clone()
+								newDebrisCopy.Name = debrisPart.Name
+								newDebrisCopy.Anchored = true
+								newDebrisCopy.CanCollide = false
+								newDebrisCopy.Parent = Workspace
+								replayData.debrisClones[uniqueId] = newDebrisCopy
+								replayData.partsMap[uniqueId] = newDebrisCopy
+							end
+						end
+					end
 				else
 					if replayData.connection then
 						replayData.connection:Disconnect()
@@ -488,11 +605,19 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 			t = math.clamp(t, 0, 1)
 
 			for uniqueId, part in pairs(replayData.partsMap) do
-				local prevCFrame = prevFrame.parts[uniqueId]
-				local nextCFrame = nextFrame.parts[uniqueId]
-				if prevCFrame and nextCFrame then
-					local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
-					part.CFrame = lerpedCFrame
+				local prevData = prevFrame.parts[uniqueId]
+				local nextData = nextFrame.parts[uniqueId]
+				if prevData and nextData then
+					if nextData.isActive and part.Parent then
+						local lerpedCFrame = prevData.CFrame:Lerp(nextData.CFrame, t)
+						part.CFrame = lerpedCFrame
+					elseif not nextData.isActive and part.Parent then
+						part:Destroy()
+						replayData.partsMap[uniqueId] = nil
+						if replayData.debrisClones[uniqueId] then
+							replayData.debrisClones[uniqueId] = nil
+						end
+					end
 				end
 			end
 		end)
@@ -512,6 +637,8 @@ playButton.MouseButton1Click:Connect(function()
 	if isRecording then
 		-- Iniciar gravação
 		recordings = {}
+		trackedParts = {}
+		tempDebrisFolder:ClearAllChildren()
 		startTime = os.clock()
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
@@ -592,6 +719,7 @@ pauseButton.MouseButton1Click:Connect(function()
 			local recordingsToPlay = replay.recordings
 			local partsMap = replay.partsMap
 			local carCopy = replay.carCopy
+			local debrisClones = replay.debrisClones
 			replay.connection = RunService.Heartbeat:Connect(function()
 				if isPaused then
 					return
@@ -604,6 +732,22 @@ pauseButton.MouseButton1Click:Connect(function()
 						replay.startTime = os.clock()
 						replay.pausedTime = 0
 						adjustedTime = 0
+						-- Restaurar peças soltas para o loop
+						for uniqueId, debrisPart in pairs(replay.debrisClones) do
+							if not debrisPart.Parent then
+								local debrisName = uniqueId:match("^Debris_(.+)$")
+								local originalDebris = tempDebrisFolder:FindFirstChild(debrisName)
+								if originalDebris then
+									local newDebrisCopy = originalDebris:Clone()
+									newDebrisCopy.Name = debrisPart.Name
+									newDebrisCopy.Anchored = true
+									newDebrisCopy.CanCollide = false
+									newDebrisCopy.Parent = Workspace
+									replay.debrisClones[uniqueId] = newDebrisCopy
+									replay.partsMap[uniqueId] = newDebrisCopy
+								end
+							end
+						end
 					else
 						if replay.connection then
 							replay.connection:Disconnect()
@@ -629,11 +773,19 @@ pauseButton.MouseButton1Click:Connect(function()
 				t = math.clamp(t, 0, 1)
 
 				for uniqueId, part in pairs(partsMap) do
-					local prevCFrame = prevFrame.parts[uniqueId]
-					local nextCFrame = nextFrame.parts[uniqueId]
-					if prevCFrame and nextCFrame then
-						local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
-						part.CFrame = lerpedCFrame
+					local prevData = prevFrame.parts[uniqueId]
+					local nextData = nextFrame.parts[uniqueId]
+					if prevData and nextData then
+						if nextData.isActive and part.Parent then
+							local lerpedCFrame = prevData.CFrame:Lerp(nextData.CFrame, t)
+							part.CFrame = lerpedCFrame
+						elseif not nextData.isActive and part.Parent then
+							part:Destroy()
+							partsMap[uniqueId] = nil
+							if debrisClones[uniqueId] then
+								debrisClones[uniqueId] = nil
+							end
+						end
 					end
 				end
 			end)
