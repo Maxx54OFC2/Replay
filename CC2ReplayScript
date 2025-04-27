@@ -21,30 +21,55 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = playerGui
 screenGui.Enabled = true
 
--- Criar Botão Principal
-local mainButton = Instance.new("TextButton")
-mainButton.Size = UDim2.new(0, 50, 0, 50)
-mainButton.Position = UDim2.new(0.1, 0, 0.1, 0)
-mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainButton.Text = "+"
-mainButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-mainButton.TextScaled = true
-mainButton.Font = Enum.Font.Gotham
-mainButton.Parent = screenGui
-mainButton.Draggable = true
-mainButton.Active = true
-mainButton.Selectable = true
-mainButton.Visible = true
+-- Criar Botão para Recording
+local recordingButton = Instance.new("TextButton")
+recordingButton.Size = UDim2.new(0, 50, 0, 50)
+recordingButton.Position = UDim2.new(0.1, 0, 0.1, 0)
+recordingButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+recordingButton.Text = "Rec"
+recordingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+recordingButton.TextScaled = true
+recordingButton.Font = Enum.Font.Gotham
+recordingButton.Parent = screenGui
+recordingButton.Draggable = true
+recordingButton.Active = true
+recordingButton.Selectable = true
+recordingButton.Visible = true
 
-local mainButtonCorner = Instance.new("UICorner")
-mainButtonCorner.CornerRadius = UDim.new(0, 8)
-mainButtonCorner.Parent = mainButton
+local recordingButtonCorner = Instance.new("UICorner")
+recordingButtonCorner.CornerRadius = UDim.new(0, 8)
+recordingButtonCorner.Parent = recordingButton
 
-local mainButtonStroke = Instance.new("UIStroke")
-mainButtonStroke.Color = Color3.fromRGB(52, 120, 246)
-mainButtonStroke.Thickness = 2
-mainButtonStroke.Transparency = 0.5
-mainButtonStroke.Parent = mainButton
+local recordingButtonStroke = Instance.new("UIStroke")
+recordingButtonStroke.Color = Color3.fromRGB(52, 120, 246)
+recordingButtonStroke.Thickness = 2
+recordingButtonStroke.Transparency = 0.5
+recordingButtonStroke.Parent = recordingButton
+
+-- Criar Botão para Saved Recordings
+local savedButton = Instance.new("TextButton")
+savedButton.Size = UDim2.new(0, 50, 0, 50)
+savedButton.Position = UDim2.new(0.1, 60, 0.1, 0)
+savedButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+savedButton.Text = "Sav"
+savedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+savedButton.TextScaled = true
+savedButton.Font = Enum.Font.Gotham
+savedButton.Parent = screenGui
+savedButton.Draggable = true
+savedButton.Active = true
+savedButton.Selectable = true
+savedButton.Visible = true
+
+local savedButtonCorner = Instance.new("UICorner")
+savedButtonCorner.CornerRadius = UDim.new(0, 8)
+savedButtonCorner.Parent = savedButton
+
+local savedButtonStroke = Instance.new("UIStroke")
+savedButtonStroke.Color = Color3.fromRGB(52, 120, 246)
+savedButtonStroke.Thickness = 2
+savedButtonStroke.Transparency = 0.5
+savedButtonStroke.Parent = savedButton
 
 -- Criar Frame do Menu Recording
 local recordingFrame = Instance.new("Frame")
@@ -355,7 +380,7 @@ cloneListLayout.Parent = cloneList
 -- Criar Frame do Menu Saved Recordings
 local savedRecordingsFrame = Instance.new("Frame")
 savedRecordingsFrame.Size = UDim2.new(0, 200, 0, 200)
-savedRecordingsFrame.Position = UDim2.new(0, 470, 0, 10)
+savedRecordingsFrame.Position = UDim2.new(0.1, 470, 0, 10)
 savedRecordingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 savedRecordingsFrame.Visible = false
 savedRecordingsFrame.Active = true
@@ -591,8 +616,8 @@ end
 local function getNextReplayCarName()
 	local carCount = 0
 	for _, obj in pairs(carsReplayFolder:GetChildren()) do
-		if obj.Name:match("^ReplayCar(%d+)$") then
-			local num = tonumber(obj.Name:match("^ReplayCar(%d+)$"))
+		if obj.Name:match("^ReplayCar(%d+)$") or obj.Name:match("^SavedCar(%d+)$") then
+			local num = tonumber(obj.Name:match("%d+$"))
 			carCount = math.max(carCount, num)
 		end
 	end
@@ -1045,10 +1070,14 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 	playReplay()
 end
 
--- Conexão do botão principal
-mainButton.MouseButton1Click:Connect(function()
+-- Conexão do botão Recording
+recordingButton.MouseButton1Click:Connect(function()
 	recordingFrame.Visible = not recordingFrame.Visible
-	savedRecordingsFrame.Visible = recordingFrame.Visible
+end)
+
+-- Conexão do botão Saved Recordings
+savedButton.MouseButton1Click:Connect(function()
+	savedRecordingsFrame.Visible = not savedRecordingsFrame.Visible
 end)
 
 -- Conexão do botão Play/Pause
