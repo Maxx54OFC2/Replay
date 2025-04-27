@@ -50,7 +50,7 @@ mainButtonTextStroke.Parent = mainButton
 
 -- Criar Frame do Menu Recording
 local recordingFrame = Instance.new("Frame")
-recordingFrame.Size = UDim2.new(0, 350, 0, 350)
+recordingFrame.Size = UDim2.new(0, 500, 0, 150)
 recordingFrame.Position = UDim2.new(0.1, 60, 0, 10)
 recordingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 recordingFrame.Visible = false
@@ -86,7 +86,7 @@ titleLabelStroke.Parent = titleLabel
 -- Contador de Tempo
 local timeLabel = Instance.new("TextLabel")
 timeLabel.Size = UDim2.new(0, 200, 0, 30)
-timeLabel.Position = UDim2.new(0, 75, 0, 50)
+timeLabel.Position = UDim2.new(0, 150, 0, 40)
 timeLabel.BackgroundTransparency = 1
 timeLabel.Text = "00:00:000"
 timeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
@@ -99,30 +99,57 @@ timeLabelStroke.Color = Color3.fromRGB(25, 45, 58)
 timeLabelStroke.Thickness = 1
 timeLabelStroke.Parent = timeLabel
 
--- Botão Play
-local playButton = Instance.new("TextButton")
-playButton.Size = UDim2.new(0, 100, 0, 40)
-playButton.Position = UDim2.new(0, 20, 0, 90)
-playButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
-playButton.Text = "Play"
-playButton.TextColor3 = Color3.fromRGB(25, 45, 58)
-playButton.TextScaled = true
-playButton.Font = Enum.Font.SourceSansBold
-playButton.Parent = recordingFrame
+-- Botão Play/Pause
+local playPauseButton = Instance.new("TextButton")
+playPauseButton.Size = UDim2.new(0, 50, 0, 50)
+playPauseButton.Position = UDim2.new(0, 20, 0, 90)
+playPauseButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+playPauseButton.Text = "▶"
+playPauseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+playPauseButton.TextScaled = true
+playPauseButton.Font = Enum.Font.SourceSansBold
+playPauseButton.Parent = recordingFrame
 
-local playButtonCorner = Instance.new("UICorner")
-playButtonCorner.CornerRadius = UDim.new(0, 8)
-playButtonCorner.Parent = playButton
+local playPauseButtonCorner = Instance.new("UICorner")
+playPauseButtonCorner.CornerRadius = UDim.new(0, 8)
+playPauseButtonCorner.Parent = playPauseButton
 
-local playButtonStroke = Instance.new("UIStroke")
-playButtonStroke.Color = Color3.fromRGB(255, 255, 255)
-playButtonStroke.Thickness = 1
-playButtonStroke.Parent = playButton
+local playPauseButtonStroke = Instance.new("UIStroke")
+playPauseButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+playPauseButtonStroke.Thickness = 1
+playPauseButtonStroke.Parent = playPauseButton
+
+-- Botão Stop
+local stopButton = Instance.new("TextButton")
+stopButton.Size = UDim2.new(0, 50, 0, 50)
+stopButton.Position = UDim2.new(0, 80, 0, 90)
+stopButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+stopButton.Text = ""
+stopButton.Parent = recordingFrame
+
+local stopButtonCorner = Instance.new("UICorner")
+stopButtonCorner.CornerRadius = UDim.new(0, 8)
+stopButtonCorner.Parent = stopButton
+
+local stopButtonStroke = Instance.new("UIStroke")
+stopButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+stopButtonStroke.Thickness = 1
+stopButtonStroke.Parent = stopButton
+
+local stopButtonInnerSquare = Instance.new("Frame")
+stopButtonInnerSquare.Size = UDim2.new(0, 20, 0, 20)
+stopButtonInnerSquare.Position = UDim2.new(0.5, -10, 0.5, -10)
+stopButtonInnerSquare.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+stopButtonInnerSquare.Parent = stopButton
+
+local stopButtonInnerSquareCorner = Instance.new("UICorner")
+stopButtonInnerSquareCorner.CornerRadius = UDim.new(0, 4)
+stopButtonInnerSquareCorner.Parent = stopButtonInnerSquare
 
 -- Botão Clear
 local clearButton = Instance.new("TextButton")
-clearButton.Size = UDim2.new(0, 100, 0, 40)
-clearButton.Position = UDim2.new(0, 230, 0, 90)
+clearButton.Size = UDim2.new(0, 50, 0, 50)
+clearButton.Position = UDim2.new(0, 140, 0, 90)
 clearButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 clearButton.Text = "Clear"
 clearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -141,8 +168,8 @@ clearButtonStroke.Parent = clearButton
 
 -- Botão Replay
 local replayButton = Instance.new("TextButton")
-replayButton.Size = UDim2.new(0, 100, 0, 40)
-replayButton.Position = UDim2.new(0, 125, 0, 140)
+replayButton.Size = UDim2.new(0, 50, 0, 50)
+replayButton.Position = UDim2.new(0, 200, 0, 90)
 replayButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
 replayButton.Text = "Replay"
 replayButton.TextColor3 = Color3.fromRGB(25, 45, 58)
@@ -161,10 +188,10 @@ replayButtonStroke.Parent = replayButton
 
 -- Botão Delete Clones
 local deleteClonesButton = Instance.new("TextButton")
-deleteClonesButton.Size = UDim2.new(0, 100, 0, 40)
-deleteClonesButton.Position = UDim2.new(0, 125, 0, 190)
+deleteClonesButton.Size = UDim2.new(0, 50, 0, 50)
+deleteClonesButton.Position = UDim2.new(0, 260, 0, 90)
 deleteClonesButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-deleteClonesButton.Text = "Delete Clones"
+deleteClonesButton.Text = "Del"
 deleteClonesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 deleteClonesButton.TextScaled = true
 deleteClonesButton.Font = Enum.Font.SourceSansBold
@@ -179,10 +206,10 @@ deleteClonesButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 deleteClonesButtonStroke.Thickness = 1
 deleteClonesButtonStroke.Parent = deleteClonesButton
 
--- Botão Pause
+-- Botão Pause (para replays)
 local pauseButton = Instance.new("TextButton")
-pauseButton.Size = UDim2.new(0, 100, 0, 40)
-pauseButton.Position = UDim2.new(0, 20, 0, 240)
+pauseButton.Size = UDim2.new(0, 50, 0, 50)
+pauseButton.Position = UDim2.new(0, 320, 0, 90)
 pauseButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
 pauseButton.Text = "Pause"
 pauseButton.TextColor3 = Color3.fromRGB(25, 45, 58)
@@ -201,10 +228,10 @@ pauseButtonStroke.Parent = pauseButton
 
 -- Botão Loop
 local loopButton = Instance.new("TextButton")
-loopButton.Size = UDim2.new(0, 100, 0, 40)
-loopButton.Position = UDim2.new(0, 230, 0, 240)
+loopButton.Size = UDim2.new(0, 50, 0, 50)
+loopButton.Position = UDim2.new(0, 380, 0, 90)
 loopButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
-loopButton.Text = "Loop: Off"
+loopButton.Text = "Loop"
 loopButton.TextColor3 = Color3.fromRGB(25, 45, 58)
 loopButton.TextScaled = true
 loopButton.Font = Enum.Font.SourceSansBold
@@ -221,8 +248,8 @@ loopButtonStroke.Parent = loopButton
 
 -- Campo de entrada para Slowmotion
 local slowmotionInput = Instance.new("TextBox")
-slowmotionInput.Size = UDim2.new(0, 100, 0, 40)
-slowmotionInput.Position = UDim2.new(0, 125, 0, 290)
+slowmotionInput.Size = UDim2.new(0, 50, 0, 50)
+slowmotionInput.Position = UDim2.new(0, 440, 0, 90)
 slowmotionInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 slowmotionInput.Text = "1.0"
 slowmotionInput.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -241,9 +268,11 @@ slowmotionInputStroke.Parent = slowmotionInput
 
 -- Variáveis de controle
 local isRecording = false
+local isPausedRecording = false
 local recordings = {}
 local startTime = 0
 local elapsedTime = 0
+local pausedTime = 0
 local heartbeatConnection
 local currentReplayCarModel = nil
 local isPaused = false
@@ -300,10 +329,9 @@ end
 local function recordAllPartsActions()
 	local car = getPlayerCar()
 	if not car then
-		playButton.Text = "No Car!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
+		playPauseButton.Text = "▶"
 		isRecording = false
+		isPausedRecording = false
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
 		end
@@ -347,17 +375,16 @@ local function recordAllPartsActions()
 	end
 
 	if next(partsData) == nil then
-		playButton.Text = "No Parts!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
+		playPauseButton.Text = "▶"
 		isRecording = false
+		isPausedRecording = false
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
 		end
 		return false
 	end
 
-	local currentTime = os.clock() - startTime
+	local currentTime = os.clock() - startTime - pausedTime
 	table.insert(recordings, {
 		time = currentTime,
 		parts = partsData
@@ -367,8 +394,8 @@ end
 
 -- Função para atualizar o cronômetro
 local function updateTimeLabel()
-	if isRecording then
-		elapsedTime = os.clock() - startTime
+	if isRecording and not isPausedRecording then
+		elapsedTime = os.clock() - startTime - pausedTime
 		timeLabel.Text = formatTime(elapsedTime)
 	end
 end
@@ -498,7 +525,7 @@ end
 -- Função para reproduzir as gravações em um clone específico
 local function replayAllPartsActions(recordingsToPlay, carModel)
 	if #recordingsToPlay == 0 then
-		replayButton.Text = "No Data!"
+		replayButton.Text = "Replay"
 		task.wait(1)
 		replayButton.Text = "Replay"
 		return
@@ -631,38 +658,56 @@ mainButton.MouseButton1Click:Connect(function()
 	recordingFrame.Visible = not recordingFrame.Visible
 end)
 
--- Conexão do botão Play
-playButton.MouseButton1Click:Connect(function()
-	isRecording = not isRecording
-	if isRecording then
+-- Conexão do botão Play/Pause
+playPauseButton.MouseButton1Click:Connect(function()
+	if not isRecording then
 		-- Iniciar gravação
+		isRecording = true
+		isPausedRecording = false
 		recordings = {}
 		trackedParts = {}
 		tempDebrisFolder:ClearAllChildren()
 		startTime = os.clock()
+		pausedTime = 0
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
 		currentReplayCarModel = saveCarModel()
 		if not currentReplayCarModel then
-			playButton.Text = "No Car!"
-			task.wait(1)
-			playButton.Text = "Play"
+			playPauseButton.Text = "▶"
 			isRecording = false
 			return
 		end
 		heartbeatConnection = RunService.Heartbeat:Connect(function()
-			if recordAllPartsActions() then
-				updateTimeLabel()
+			if not isPausedRecording then
+				if recordAllPartsActions() then
+					updateTimeLabel()
+				end
 			end
 		end)
-		playButton.Text = "Stop"
+		playPauseButton.Text = "⏸"
 	else
-		-- Parar gravação
+		-- Pausar ou retomar gravação
+		isPausedRecording = not isPausedRecording
+		if isPausedRecording then
+			pausedTime = os.clock() - startTime - elapsedTime
+			playPauseButton.Text = "▶"
+		else
+			startTime = os.clock() - elapsedTime - pausedTime
+			playPauseButton.Text = "⏸"
+		end
+	end
+end)
+
+-- Conexão do botão Stop
+stopButton.MouseButton1Click:Connect(function()
+	if isRecording then
+		isRecording = false
+		isPausedRecording = false
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
 			heartbeatConnection = nil
 		end
-		playButton.Text = "Play"
+		playPauseButton.Text = "▶"
 	end
 end)
 
@@ -670,14 +715,16 @@ end)
 clearButton.MouseButton1Click:Connect(function()
 	recordings = {}
 	elapsedTime = 0
+	pausedTime = 0
 	timeLabel.Text = "00:00:000"
 	if isRecording then
 		isRecording = false
+		isPausedRecording = false
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
 			heartbeatConnection = nil
 		end
-		playButton.Text = "Play"
+		playPauseButton.Text = "▶"
 	end
 	currentReplayCarModel = nil
 	destroyAllClones()
@@ -686,7 +733,7 @@ end)
 -- Conexão do botão Replay
 replayButton.MouseButton1Click:Connect(function()
 	if isRecording then
-		replayButton.Text = "Stop Recording!"
+		replayButton.Text = "Stop Rec!"
 		task.wait(1)
 		replayButton.Text = "Replay"
 		return
@@ -701,7 +748,7 @@ deleteClonesButton.MouseButton1Click:Connect(function()
 	destroyAllClones()
 end)
 
--- Conexão do botão Pause
+-- Conexão do botão Pause (para replays)
 pauseButton.MouseButton1Click:Connect(function()
 	isPaused = not isPaused
 	pauseButton.Text = isPaused and "Resume" or "Pause"
@@ -796,7 +843,7 @@ end)
 -- Conexão do botão Loop
 loopButton.MouseButton1Click:Connect(function()
 	isLooping = not isLooping
-	loopButton.Text = isLooping and "Loop: On" or "Loop: Off"
+	loopButton.Text = isLooping and "Loop On" or "Loop"
 end)
 
 -- Conexão do campo Slowmotion
