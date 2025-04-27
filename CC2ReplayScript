@@ -50,6 +50,7 @@ mainMenuFrame.Position = UDim2.new(0.1, 60, 0, 10)
 mainMenuFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainMenuFrame.Visible = false
 mainMenuFrame.Active = true
+mainMenuFrame.Draggable = true
 mainMenuFrame.Parent = screenGui
 
 local mainMenuFrameCorner = Instance.new("UICorner")
@@ -61,25 +62,25 @@ mainMenuFrameStroke.Color = Color3.fromRGB(88, 137, 192)
 mainMenuFrameStroke.Thickness = 1
 mainMenuFrameStroke.Parent = mainMenuFrame
 
--- Botão para abrir o menu Replay
-local replayMenuButton = Instance.new("TextButton")
-replayMenuButton.Size = UDim2.new(0, 160, 0, 40)
-replayMenuButton.Position = UDim2.new(0, 20, 0, 20)
-replayMenuButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
-replayMenuButton.Text = "Replay"
-replayMenuButton.TextColor3 = Color3.fromRGB(25, 45, 58)
-replayMenuButton.TextScaled = true
-replayMenuButton.Font = Enum.Font.SourceSansBold
-replayMenuButton.Parent = mainMenuFrame
+-- Botão para abrir o menu Recording
+local recordingMenuButton = Instance.new("TextButton")
+recordingMenuButton.Size = UDim2.new(0, 160, 0, 40)
+recordingMenuButton.Position = UDim2.new(0, 20, 0, 20)
+recordingMenuButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+recordingMenuButton.Text = "Recording"
+recordingMenuButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+recordingMenuButton.TextScaled = true
+recordingMenuButton.Font = Enum.Font.SourceSansBold
+recordingMenuButton.Parent = mainMenuFrame
 
-local replayMenuButtonCorner = Instance.new("UICorner")
-replayMenuButtonCorner.CornerRadius = UDim.new(0, 8)
-replayMenuButtonCorner.Parent = replayMenuButton
+local DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D = Instance.new("UICorner")
+DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.CornerRadius = UDim.new(0, 8)
+DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Parent = recordingMenuButton
 
-local replayMenuButtonStroke = Instance.new("UIStroke")
-replayMenuButtonStroke.Color = Color3.fromRGB(255, 255, 255)
-replayMenuButtonStroke.Thickness = 1
-replayMenuButtonStroke.Parent = replayMenuButton
+local DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D = Instance.new("UIStroke")
+DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Color = Color3.fromRGB(255, 255, 255)
+DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Thickness = 1
+DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Parent = recordingMenuButton
 
 -- Botão para abrir o menu Replays
 local replaysMenuButton = Instance.new("TextButton")
@@ -101,34 +102,35 @@ replaysMenuButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 replaysMenuButtonStroke.Thickness = 1
 replaysMenuButtonStroke.Parent = replaysMenuButton
 
--- Criar Frame do Menu Replay
-local replayFrame = Instance.new("Frame")
-replayFrame.Size = UDim2.new(0, 350, 0, 300)
-replayFrame.Position = UDim2.new(0.1, 60, 0, 10)
-replayFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-replayFrame.Visible = false
-replayFrame.Active = true
-replayFrame.Parent = screenGui
+-- Criar Frame do Menu Recording
+local recordingFrame = Instance.new("Frame")
+recordingFrame.Size = UDim2.new(0, 350, 0, 350)
+recordingFrame.Position = UDim2.new(0.1, 60, 0, 10)
+recordingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+recordingFrame.Visible = false
+recordingFrame.Active = true
+recordingFrame.Draggable = true
+recordingFrame.Parent = screenGui
 
-local replayFrameCorner = Instance.new("UICorner")
-replayFrameCorner.CornerRadius = UDim.new(0, 12)
-replayFrameCorner.Parent = replayFrame
+local recordingFrameCorner = Instance.new("UICorner")
+recordingFrameCorner.CornerRadius = UDim.new(0, 12)
+recordingFrameCorner.Parent = recordingFrame
 
-local replayFrameStroke = Instance.new("UIStroke")
-replayFrameStroke.Color = Color3.fromRGB(88, 137, 192)
-replayFrameStroke.Thickness = 1
-replayFrameStroke.Parent = replayFrame
+local recordingFrameStroke = Instance.new("UIStroke")
+recordingFrameStroke.Color = Color3.fromRGB(88, 137, 192)
+recordingFrameStroke.Thickness = 1
+recordingFrameStroke.Parent = recordingFrame
 
--- Título "Replay"
+-- Título "Recording"
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, 0, 0, 30)
 titleLabel.Position = UDim2.new(0, 0, 0, 5)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Replay"
+titleLabel.Text = "Recording"
 titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.Parent = replayFrame
+titleLabel.Parent = recordingFrame
 
 local titleLabelStroke = Instance.new("UIStroke")
 titleLabelStroke.Color = Color3.fromRGB(25, 45, 58)
@@ -144,7 +146,7 @@ timeLabel.Text = "00:00:000"
 timeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 timeLabel.TextScaled = true
 timeLabel.Font = Enum.Font.SourceSansBold
-timeLabel.Parent = replayFrame
+timeLabel.Parent = recordingFrame
 
 local timeLabelStroke = Instance.new("UIStroke")
 timeLabelStroke.Color = Color3.fromRGB(25, 45, 58)
@@ -160,7 +162,7 @@ playButton.Text = "Play"
 playButton.TextColor3 = Color3.fromRGB(25, 45, 58)
 playButton.TextScaled = true
 playButton.Font = Enum.Font.SourceSansBold
-playButton.Parent = replayFrame
+playButton.Parent = recordingFrame
 
 local playButtonCorner = Instance.new("UICorner")
 playButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -180,7 +182,7 @@ clearButton.Text = "Clear"
 clearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 clearButton.TextScaled = true
 clearButton.Font = Enum.Font.SourceSansBold
-clearButton.Parent = replayFrame
+clearButton.Parent = recordingFrame
 
 local clearButtonCorner = Instance.new("UICorner")
 clearButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -200,7 +202,7 @@ replayButton.Text = "Replay"
 replayButton.TextColor3 = Color3.fromRGB(25, 45, 58)
 replayButton.TextScaled = true
 replayButton.Font = Enum.Font.SourceSansBold
-replayButton.Parent = replayFrame
+replayButton.Parent = recordingFrame
 
 local replayButtonCorner = Instance.new("UICorner")
 replayButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -211,16 +213,16 @@ replayButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 replayButtonStroke.Thickness = 1
 replayButtonStroke.Parent = replayButton
 
--- Botão Save (novo)
+-- Botão Save
 local saveButton = Instance.new("TextButton")
 saveButton.Size = UDim2.new(0, 100, 0, 40)
-saveButton.Position = UDim2.new(0, 125, 0, 190)
+saveButton.Position = UDim2.new(0, 20, 0, 190)
 saveButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 saveButton.Text = "Save"
 saveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 saveButton.TextScaled = true
 saveButton.Font = Enum.Font.SourceSansBold
-saveButton.Parent = replayFrame
+saveButton.Parent = recordingFrame
 
 local saveButtonCorner = Instance.new("UICorner")
 saveButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -231,6 +233,86 @@ saveButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 saveButtonStroke.Thickness = 1
 saveButtonStroke.Parent = saveButton
 
+-- Botão Delete Clones
+local deleteClonesButton = Instance.new("TextButton")
+deleteClonesButton.Size = UDim2.new(0, 100, 0, 40)
+deleteClonesButton.Position = UDim2.new(0, 230, 0, 190)
+deleteClonesButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+deleteClonesButton.Text = "Delete Clones"
+deleteClonesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+deleteClonesButton.TextScaled = true
+deleteClonesButton.Font = Enum.Font.SourceSansBold
+deleteClonesButton.Parent = recordingFrame
+
+local deleteClonesButtonCorner = Instance.new("UICorner")
+deleteClonesButtonCorner.CornerRadius = UDim.new(0, 8)
+deleteClonesButtonCorner.Parent = deleteClonesButton
+
+local deleteClonesButtonStroke = Instance.new("UIStroke")
+deleteClonesButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+deleteClonesButtonStroke.Thickness = 1
+deleteClonesButtonStroke.Parent = deleteClonesButton
+
+-- Botão Pause
+local pauseButton = Instance.new("TextButton")
+pauseButton.Size = UDim2.new(0, 100, 0, 40)
+pauseButton.Position = UDim2.new(0, 125, 0, 240)
+pauseButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+pauseButton.Text = "Pause"
+pauseButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+pauseButton.TextScaled = true
+pauseButton.Font = Enum.Font.SourceSansBold
+pauseButton.Parent = recordingFrame
+
+local pauseButtonCorner = Instance.new("UICorner")
+pauseButtonCorner.CornerRadius = UDim.new(0, 8)
+pauseButtonCorner.Parent = pauseButton
+
+local pauseButtonStroke = Instance.new("UIStroke")
+pauseButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+pauseButtonStroke.Thickness = 1
+pauseButtonStroke.Parent = pauseButton
+
+-- Botão Loop
+local loopButton = Instance.new("TextButton")
+loopButton.Size = UDim2.new(0, 100, 0, 40)
+loopButton.Position = UDim2.new(0, 20, 0, 290)
+loopButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+loopButton.Text = "Loop: Off"
+loopButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+loopButton.TextScaled = true
+loopButton.Font = Enum.Font.SourceSansBold
+loopButton.Parent = recordingFrame
+
+local loopButtonCorner = Instance.new("UICorner")
+loopButtonCorner.CornerRadius = UDim.new(0, 8)
+loopButtonCorner.Parent = loopButton
+
+local loopButtonStroke = Instance.new("UIStroke")
+loopButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+loopButtonStroke.Thickness = 1
+loopButtonStroke.Parent = loopButton
+
+-- Campo de entrada para Slowmotion
+local slowmotionInput = Instance.new("TextBox")
+slowmotionInput.Size = UDim2.new(0, 100, 0, 40)
+slowmotionInput.Position = UDim2.new(0, 230, 0, 290)
+slowmotionInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+slowmotionInput.Text = "1.0"
+slowmotionInput.TextColor3 = Color3.fromRGB(200, 200, 200)
+slowmotionInput.TextScaled = true
+slowmotionInput.Font = Enum.Font.SourceSans
+slowmotionInput.Parent = recordingFrame
+
+local slowmotionInputCorner = Instance.new("UICorner")
+slowmotionInputCorner.CornerRadius = UDim.new(0, 8)
+slowmotionInputCorner.Parent = slowmotionInput
+
+local slowmotionInputStroke = Instance.new("UIStroke")
+slowmotionInputStroke.Color = Color3.fromRGB(88, 137, 192)
+slowmotionInputStroke.Thickness = 1
+slowmotionInputStroke.Parent = slowmotionInput
+
 -- Criar Frame do Menu Replays
 local replaysFrame = Instance.new("Frame")
 replaysFrame.Size = UDim2.new(0, 400, 0, 300)
@@ -238,6 +320,7 @@ replaysFrame.Position = UDim2.new(0.1, 60, 0, 10)
 replaysFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 replaysFrame.Visible = false
 replaysFrame.Active = true
+replaysFrame.Draggable = true
 replaysFrame.Parent = screenGui
 
 local replaysFrameCorner = Instance.new("UICorner")
@@ -284,6 +367,8 @@ savePopupFrame.Size = UDim2.new(0, 300, 0, 200)
 savePopupFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
 savePopupFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 savePopupFrame.Visible = false
+savePopupFrame.Active = true
+savePopupFrame.Draggable = true
 savePopupFrame.Parent = screenGui
 
 local savePopupFrameCorner = Instance.new("UICorner")
@@ -375,6 +460,14 @@ local elapsedTime = 0
 local heartbeatConnection
 local replayConnection
 local currentReplayCarModel = nil
+local isPaused = false
+local isLooping = false
+local playbackSpeed = 1.0
+local currentReplayData = nil
+local currentCarModel = nil
+local currentReplayStartTime = 0
+local currentReplayIndex = 1
+local pausedTime = 0
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -421,47 +514,36 @@ local function getNextReplayCarName()
 	return "ReplayCar" .. (carCount + 1)
 end
 
--- Função para gravar ações de todas as partes
-local function recordAllPartsActions()
+-- Função para clonar e salvar o carro em CarsReplay
+local function saveCarModel()
 	local car = getPlayerCar()
 	if not car then
-		playButton.Text = "No Car!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
-		isRecording = false
-		if heartbeatConnection then
-			heartbeatConnection:Disconnect()
-		end
-		return
+		return nil
 	end
 
-	local partsData = {}
-	local partIndex = {}
-	for _, part in pairs(car:GetDescendants()) do
+	local carCopy = car:Clone()
+	carCopy.Name = getNextReplayCarName()
+	for _, part in pairs(carCopy:GetDescendants()) do
 		if part:IsA("BasePart") then
-			local partName = part.Name
-			partIndex[partName] = (partIndex[partName] or 0) + 1
-			local uniqueId = getUniquePartId(part, partIndex[partName])
-			partsData[uniqueId] = part.CFrame
+			part.Anchored = false
+			part.CanCollide = false
+		elseif part:IsA("VehicleSeat") then
+			part.Disabled = true
+		elseif part:IsA("BodyVelocity") or part:IsA("BodyGyro") then
+			part:Destroy()
 		end
 	end
+	carCopy.Parent = carsReplayFolder
+	return carCopy
+end
 
-	if next(partsData) == nil then
-		playButton.Text = "No Parts!"
-		task.wait(1)
-		playButton.Text = isRecording and "Stop" or "Play"
-		isRecording = false
-		if heartbeatConnection then
-			heartbeatConnection:Disconnect()
+-- Função para destruir todas as cópias do carro no Workspace
+local function destroyAllClones()
+	for _, obj in pairs(Workspace:GetChildren()) do
+		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") then
+			obj:Destroy()
 		end
-		return
 	end
-
-	local currentTime = tick() - startTime
-	table.insert(recordings, {
-		time = currentTime,
-		parts = partsData
-	})
 end
 
 -- Função para duplicar o carro (para replays)
@@ -499,36 +581,16 @@ local function duplicateCar(carModel)
 	return carCopy
 end
 
--- Função para clonar e salvar o carro em CarsReplay
-local function saveCarModel()
-	local car = getPlayerCar()
-	if not car then
-		return nil
-	end
-
-	local carCopy = car:Clone()
-	carCopy.Name = getNextReplayCarName()
-	for _, part in pairs(carCopy:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.Anchored = false
-			part.CanCollide = false
-		elseif part:IsA("VehicleSeat") then
-			part.Disabled = true
-		elseif part:IsA("BodyVelocity") or part:IsA("BodyGyro") then
-			part:Destroy()
+-- Função para copiar profundamente uma tabela
+local function deepCopy(original)
+	local copy = {}
+	for k, v in pairs(original) do
+		if type(v) == "table" then
+			v = deepCopy(v)
 		end
+		copy[k] = v
 	end
-	carCopy.Parent = carsReplayFolder
-	return carCopy
-end
-
--- Função para destruir todas as cópias do carro no Workspace
-local function destroyAllClones()
-	for _, obj in pairs(Workspace:GetChildren()) do
-		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") then
-			obj:Destroy()
-		end
-	end
+	return copy
 end
 
 -- Função para atualizar a lista de replays no menu Replays
@@ -557,6 +619,10 @@ local function updateReplaysList()
 		replayButtonStroke.Parent = replayButton
 
 		replayButton.MouseButton1Click:Connect(function()
+			currentReplayData = replay.recordings
+			currentCarModel = replay.carModel
+			isPaused = false
+			pauseButton.Text = "Pause"
 			replayAllPartsActions(replay.recordings, replay.carModel)
 		end)
 
@@ -601,50 +667,68 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		return
 	end
 
-	local startReplayTime = tick()
-	local index = 1
+	currentReplayData = recordingsToPlay
+	currentCarModel = carModel
+	currentReplayStartTime = tick()
+	currentReplayIndex = 1
+	isPaused = false
+	pauseButton.Text = "Pause"
 
-	replayConnection = RunService.Heartbeat:Connect(function()
-		local currentTime = tick() - startReplayTime
-		if index > #recordingsToPlay then
-			if replayConnection then
-				replayConnection:Disconnect()
+	local function playReplay()
+		replayConnection = RunService.Heartbeat:Connect(function()
+			if isPaused then
+				return
 			end
-			return
-		end
 
-		while index < #recordingsToPlay and recordingsToPlay[index].time <= currentTime do
-			index = index + 1
-		end
-
-		local prevFrame = recordingsToPlay[math.max(1, index - 1)]
-		local nextFrame = recordingsToPlay[index] or prevFrame
-		local t = (currentTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
-		t = math.clamp(t, 0, 1)
-
-		for uniqueId, part in pairs(partsMap) do
-			local prevCFrame = prevFrame.parts[uniqueId]
-			local nextCFrame = nextFrame.parts[uniqueId]
-			if prevCFrame and nextCFrame then
-				local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
-				part.CFrame = lerpedCFrame
+			local adjustedTime = (tick() - currentReplayStartTime - pausedTime) * playbackSpeed
+			if currentReplayIndex > #recordingsToPlay then
+				if isLooping then
+					currentReplayIndex = 1
+					currentReplayStartTime = tick() - pausedTime / playbackSpeed
+					adjustedTime = 0
+				else
+					if replayConnection then
+						replayConnection:Disconnect()
+					end
+					return
+				end
 			end
-		end
-	end)
+
+			while currentReplayIndex < #recordingsToPlay and recordingsToPlay[currentReplayIndex].time <= adjustedTime do
+				currentReplayIndex = currentReplayIndex + 1
+			end
+
+			local prevFrame = recordingsToPlay[math.max(1, currentReplayIndex - 1)]
+			local nextFrame = recordingsToPlay[currentReplayIndex] or prevFrame
+			local t = (adjustedTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
+			t = math.clamp(t, 0, 1)
+
+			for uniqueId, part in pairs(partsMap) do
+				local prevCFrame = prevFrame.parts[uniqueId]
+				local nextCFrame = nextFrame.parts[uniqueId]
+				if prevCFrame and nextCFrame then
+					local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
+					part.CFrame = lerpedCFrame
+				end
+			end
+		end)
+	end
+
+	playReplay()
 end
 
 -- Conexão do botão principal
 mainButton.MouseButton1Click:Connect(function()
 	mainMenuFrame.Visible = not mainMenuFrame.Visible
-	replayFrame.Visible = false
+	recordingFrame.Visible = false
 	replaysFrame.Visible = false
 	savePopupFrame.Visible = false
 end)
 
--- Conexão do botão Replay Menu
-replayMenuButton.MouseButton1Click:Connect(function()
+-- Conexão do botão Recording Menu
+recordingMenuButton.MouseButton1Click:Connect(function()
 	mainMenuFrame.Visible = false
-	replayFrame.Visible = true
+	recordingFrame.Visible = true
 	replaysFrame.Visible = false
 	savePopupFrame.Visible = false
 end)
@@ -652,7 +736,7 @@ end)
 -- Conexão do botão Replays Menu
 replaysMenuButton.MouseButton1Click:Connect(function()
 	mainMenuFrame.Visible = false
-	replayFrame.Visible = false
+	recordingFrame.Visible = false
 	replaysFrame.Visible = true
 	savePopupFrame.Visible = false
 	updateReplaysList()
@@ -716,14 +800,58 @@ replayButton.MouseButton1Click:Connect(function()
 		replayButton.Text = "Replay"
 		return
 	end
-	if currentReplayCarModel then
+	if currentReplayCarModel and #recordings > 0 then
+		currentReplayData = recordings
+		currentCarModel = currentReplayCarModel
+		isPaused = false
+		pauseButton.Text = "Pause"
 		replayAllPartsActions(recordings, currentReplayCarModel)
 	end
 end)
 
 -- Conexão do botão Save
 saveButton.MouseButton1Click:Connect(function()
-	savePopupFrame.Visible = true
+	if #recordings > 0 then
+		savePopupFrame.Visible = true
+	end
+end)
+
+-- Conexão do botão Delete Clones
+deleteClonesButton.MouseButton1Click:Connect(function()
+	destroyAllClones()
+end)
+
+-- Conexão do botão Pause
+pauseButton.MouseButton1Click:Connect(function()
+	if currentReplayData and currentCarModel then
+		isPaused = not isPaused
+		pauseButton.Text = isPaused and "Resume" or "Pause"
+		if isPaused then
+			if replayConnection then
+				pausedTime = tick() - currentReplayStartTime
+				replayConnection:Disconnect()
+			end
+		else
+			currentReplayStartTime = tick() - pausedTime
+			replayAllPartsActions(currentReplayData, currentCarModel)
+		end
+	end
+end)
+
+-- Conexão do botão Loop
+loopButton.MouseButton1Click:Connect(function()
+	isLooping = not isLooping
+	loopButton.Text = isLooping and "Loop: On" or "Loop: Off"
+end)
+
+-- Conexão do campo Slowmotion
+slowmotionInput.FocusLost:Connect(function()
+	local input = tonumber(slowmotionInput.Text)
+	if input and input > 0 then
+		playbackSpeed = input
+	else
+		slowmotionInput.Text = tostring(playbackSpeed)
+	end
 end)
 
 -- Conexão do botão Confirm Save
@@ -735,9 +863,10 @@ confirmSaveButton.MouseButton1Click:Connect(function()
 			replayName = replayName,
 			carName = carName,
 			duration = elapsedTime,
-			recordings = recordings,
+			recordings = deepCopy(recordings),
 			carModel = currentReplayCarModel
 		})
+		updateReplaysList()
 	end
 	savePopupFrame.Visible = false
 	replayNameInput.Text = "Replay Name"
