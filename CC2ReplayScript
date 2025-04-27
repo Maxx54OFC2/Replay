@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -28,6 +29,7 @@ mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.Text = "+"
 mainButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 mainButton.TextScaled = true
+mainButton.Font = Enum.Font.Gotham
 mainButton.Parent = screenGui
 mainButton.Draggable = true
 mainButton.Active = true
@@ -39,18 +41,14 @@ mainButtonCorner.CornerRadius = UDim.new(0, 8)
 mainButtonCorner.Parent = mainButton
 
 local mainButtonStroke = Instance.new("UIStroke")
-mainButtonStroke.Color = Color3.fromRGB(88, 137, 192)
+mainButtonStroke.Color = Color3.fromRGB(52, 120, 246)
 mainButtonStroke.Thickness = 2
+mainButtonStroke.Transparency = 0.5
 mainButtonStroke.Parent = mainButton
-
-local mainButtonTextStroke = Instance.new("UIStroke")
-mainButtonTextStroke.Color = Color3.fromRGB(25, 45, 58)
-mainButtonTextStroke.Thickness = 1
-mainButtonTextStroke.Parent = mainButton
 
 -- Criar Frame do Menu Recording
 local recordingFrame = Instance.new("Frame")
-recordingFrame.Size = UDim2.new(0, 500, 0, 150)
+recordingFrame.Size = UDim2.new(0, 400, 0, 200)
 recordingFrame.Position = UDim2.new(0.1, 60, 0, 10)
 recordingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 recordingFrame.Visible = false
@@ -63,52 +61,75 @@ recordingFrameCorner.CornerRadius = UDim.new(0, 12)
 recordingFrameCorner.Parent = recordingFrame
 
 local recordingFrameStroke = Instance.new("UIStroke")
-recordingFrameStroke.Color = Color3.fromRGB(88, 137, 192)
+recordingFrameStroke.Color = Color3.fromRGB(0, 0, 0)
 recordingFrameStroke.Thickness = 1
+recordingFrameStroke.Transparency = 0.5
 recordingFrameStroke.Parent = recordingFrame
 
 -- Título "Recording"
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 30)
-titleLabel.Position = UDim2.new(0, 0, 0, 5)
-titleLabel.BackgroundTransparency = 1
+titleLabel.Size = UDim2.new(1, -20, 0, 30)
+titleLabel.Position = UDim2.new(0, 10, 0, 5)
+titleLabel.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
 titleLabel.Text = "Recording"
-titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextScaled = true
-titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.Font = Enum.Font.Gotham
 titleLabel.Parent = recordingFrame
 
+local titleLabelCorner = Instance.new("UICorner")
+titleLabelCorner.CornerRadius = UDim.new(0, 8)
+titleLabelCorner.Parent = titleLabel
+
 local titleLabelStroke = Instance.new("UIStroke")
-titleLabelStroke.Color = Color3.fromRGB(25, 45, 58)
+titleLabelStroke.Color = Color3.fromRGB(0, 0, 0)
 titleLabelStroke.Thickness = 1
+titleLabelStroke.Transparency = 0.5
 titleLabelStroke.Parent = titleLabel
+
+-- Seção de Gravação
+local recordingSection = Instance.new("Frame")
+recordingSection.Size = UDim2.new(1, -20, 0, 60)
+recordingSection.Position = UDim2.new(0, 10, 0, 40)
+recordingSection.BackgroundTransparency = 1
+recordingSection.Parent = recordingFrame
+
+local recordingSectionList = Instance.new("UIListLayout")
+recordingSectionList.FillDirection = Enum.FillDirection.Horizontal
+recordingSectionList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+recordingSectionList.VerticalAlignment = Enum.VerticalAlignment.Center
+recordingSectionList.Padding = UDim.new(0, 10)
+recordingSectionList.Parent = recordingSection
 
 -- Contador de Tempo
 local timeLabel = Instance.new("TextLabel")
-timeLabel.Size = UDim2.new(0, 200, 0, 30)
-timeLabel.Position = UDim2.new(0, 150, 0, 40)
-timeLabel.BackgroundTransparency = 1
+timeLabel.Size = UDim2.new(0, 120, 0, 30)
+timeLabel.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
 timeLabel.Text = "00:00:000"
-timeLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+timeLabel.TextColor3 = Color3.fromRGB(176, 176, 176)
 timeLabel.TextScaled = true
-timeLabel.Font = Enum.Font.SourceSansBold
-timeLabel.Parent = recordingFrame
+timeLabel.Font = Enum.Font.Gotham
+timeLabel.Parent = recordingSection
+
+local timeLabelCorner = Instance.new("UICorner")
+timeLabelCorner.CornerRadius = UDim.new(0, 6)
+timeLabelCorner.Parent = timeLabel
 
 local timeLabelStroke = Instance.new("UIStroke")
-timeLabelStroke.Color = Color3.fromRGB(25, 45, 58)
+timeLabelStroke.Color = Color3.fromRGB(0, 0, 0)
 timeLabelStroke.Thickness = 1
+timeLabelStroke.Transparency = 0.5
 timeLabelStroke.Parent = timeLabel
 
 -- Botão Play/Pause
 local playPauseButton = Instance.new("TextButton")
 playPauseButton.Size = UDim2.new(0, 50, 0, 50)
-playPauseButton.Position = UDim2.new(0, 20, 0, 90)
-playPauseButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+playPauseButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
 playPauseButton.Text = "▶"
 playPauseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 playPauseButton.TextScaled = true
-playPauseButton.Font = Enum.Font.SourceSansBold
-playPauseButton.Parent = recordingFrame
+playPauseButton.Font = Enum.Font.Gotham
+playPauseButton.Parent = recordingSection
 
 local playPauseButtonCorner = Instance.new("UICorner")
 playPauseButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -122,10 +143,9 @@ playPauseButtonStroke.Parent = playPauseButton
 -- Botão Stop
 local stopButton = Instance.new("TextButton")
 stopButton.Size = UDim2.new(0, 50, 0, 50)
-stopButton.Position = UDim2.new(0, 80, 0, 90)
-stopButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+stopButton.BackgroundColor3 = Color3.fromRGB(211, 47, 47)
 stopButton.Text = ""
-stopButton.Parent = recordingFrame
+stopButton.Parent = recordingSection
 
 local stopButtonCorner = Instance.new("UICorner")
 stopButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -149,13 +169,12 @@ stopButtonInnerSquareCorner.Parent = stopButtonInnerSquare
 -- Botão Clear
 local clearButton = Instance.new("TextButton")
 clearButton.Size = UDim2.new(0, 50, 0, 50)
-clearButton.Position = UDim2.new(0, 140, 0, 90)
-clearButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+clearButton.BackgroundColor3 = Color3.fromRGB(211, 47, 47)
 clearButton.Text = "Clear"
 clearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 clearButton.TextScaled = true
-clearButton.Font = Enum.Font.SourceSansBold
-clearButton.Parent = recordingFrame
+clearButton.Font = Enum.Font.Gotham
+clearButton.Parent = recordingSection
 
 local clearButtonCorner = Instance.new("UICorner")
 clearButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -166,16 +185,29 @@ clearButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 clearButtonStroke.Thickness = 1
 clearButtonStroke.Parent = clearButton
 
+-- Seção de Replay
+local replaySection = Instance.new("Frame")
+replaySection.Size = UDim2.new(1, -20, 0, 90)
+replaySection.Position = UDim2.new(0, 10, 0, 110)
+replaySection.BackgroundTransparency = 1
+replaySection.Parent = recordingFrame
+
+local replaySectionList = Instance.new("UIListLayout")
+replaySectionList.FillDirection = Enum.FillDirection.Horizontal
+replaySectionList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+replaySectionList.VerticalAlignment = Enum.VerticalAlignment.Top
+replaySectionList.Padding = UDim.new(0, 10)
+replaySectionList.Parent = replaySection
+
 -- Botão Replay
 local replayButton = Instance.new("TextButton")
 replayButton.Size = UDim2.new(0, 50, 0, 50)
-replayButton.Position = UDim2.new(0, 200, 0, 90)
-replayButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+replayButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
 replayButton.Text = "Replay"
-replayButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+replayButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 replayButton.TextScaled = true
-replayButton.Font = Enum.Font.SourceSansBold
-replayButton.Parent = recordingFrame
+replayButton.Font = Enum.Font.Gotham
+replayButton.Parent = replaySection
 
 local replayButtonCorner = Instance.new("UICorner")
 replayButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -189,13 +221,12 @@ replayButtonStroke.Parent = replayButton
 -- Botão Delete Clones
 local deleteClonesButton = Instance.new("TextButton")
 deleteClonesButton.Size = UDim2.new(0, 50, 0, 50)
-deleteClonesButton.Position = UDim2.new(0, 260, 0, 90)
-deleteClonesButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+deleteClonesButton.BackgroundColor3 = Color3.fromRGB(211, 47, 47)
 deleteClonesButton.Text = "Del"
 deleteClonesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 deleteClonesButton.TextScaled = true
-deleteClonesButton.Font = Enum.Font.SourceSansBold
-deleteClonesButton.Parent = recordingFrame
+deleteClonesButton.Font = Enum.Font.Gotham
+deleteClonesButton.Parent = replaySection
 
 local deleteClonesButtonCorner = Instance.new("UICorner")
 deleteClonesButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -209,13 +240,12 @@ deleteClonesButtonStroke.Parent = deleteClonesButton
 -- Botão Pause (para replays)
 local pauseButton = Instance.new("TextButton")
 pauseButton.Size = UDim2.new(0, 50, 0, 50)
-pauseButton.Position = UDim2.new(0, 320, 0, 90)
-pauseButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+pauseButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
 pauseButton.Text = "Pause"
-pauseButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+pauseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 pauseButton.TextScaled = true
-pauseButton.Font = Enum.Font.SourceSansBold
-pauseButton.Parent = recordingFrame
+pauseButton.Font = Enum.Font.Gotham
+pauseButton.Parent = replaySection
 
 local pauseButtonCorner = Instance.new("UICorner")
 pauseButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -229,13 +259,12 @@ pauseButtonStroke.Parent = pauseButton
 -- Botão Loop
 local loopButton = Instance.new("TextButton")
 loopButton.Size = UDim2.new(0, 50, 0, 50)
-loopButton.Position = UDim2.new(0, 380, 0, 90)
-loopButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
+loopButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
 loopButton.Text = "Loop"
-loopButton.TextColor3 = Color3.fromRGB(25, 45, 58)
+loopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 loopButton.TextScaled = true
-loopButton.Font = Enum.Font.SourceSansBold
-loopButton.Parent = recordingFrame
+loopButton.Font = Enum.Font.Gotham
+loopButton.Parent = replaySection
 
 local loopButtonCorner = Instance.new("UICorner")
 loopButtonCorner.CornerRadius = UDim.new(0, 8)
@@ -249,22 +278,96 @@ loopButtonStroke.Parent = loopButton
 -- Campo de entrada para Slowmotion
 local slowmotionInput = Instance.new("TextBox")
 slowmotionInput.Size = UDim2.new(0, 50, 0, 50)
-slowmotionInput.Position = UDim2.new(0, 440, 0, 90)
-slowmotionInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+slowmotionInput.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
 slowmotionInput.Text = "1.0"
-slowmotionInput.TextColor3 = Color3.fromRGB(200, 200, 200)
+slowmotionInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 slowmotionInput.TextScaled = true
-slowmotionInput.Font = Enum.Font.SourceSans
-slowmotionInput.Parent = recordingFrame
+slowmotionInput.Font = Enum.Font.Gotham
+slowmotionInput.Parent = replaySection
 
 local slowmotionInputCorner = Instance.new("UICorner")
 slowmotionInputCorner.CornerRadius = UDim.new(0, 8)
 slowmotionInputCorner.Parent = slowmotionInput
 
 local slowmotionInputStroke = Instance.new("UIStroke")
-slowmotionInputStroke.Color = Color3.fromRGB(88, 137, 192)
+slowmotionInputStroke.Color = Color3.fromRGB(52, 120, 246)
 slowmotionInputStroke.Thickness = 1
 slowmotionInputStroke.Parent = slowmotionInput
+
+-- Frame para Spectate
+local spectateFrame = Instance.new("Frame")
+spectateFrame.Size = UDim2.new(0, 80, 0, 80)
+spectateFrame.Position = UDim2.new(0, 290, 0, 5)
+spectateFrame.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+spectateFrame.Parent = replaySection
+
+local spectateFrameCorner = Instance.new("UICorner")
+spectateFrameCorner.CornerRadius = UDim.new(0, 8)
+spectateFrameCorner.Parent = spectateFrame
+
+local spectateFrameStroke = Instance.new("UIStroke")
+spectateFrameStroke.Color = Color3.fromRGB(0, 0, 0)
+spectateFrameStroke.Thickness = 1
+spectateFrameStroke.Transparency = 0.5
+spectateFrameStroke.Parent = spectateFrame
+
+-- Botão Spectate
+local spectateButton = Instance.new("TextButton")
+spectateButton.Size = UDim2.new(0, 60, 0, 30)
+spectateButton.Position = UDim2.new(0, 10, 0, 5)
+spectateButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
+spectateButton.Text = "Spectate"
+spectateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spectateButton.TextScaled = true
+spectateButton.Font = Enum.Font.Gotham
+spectateButton.Parent = spectateFrame
+
+local spectateButtonCorner = Instance.new("UICorner")
+spectateButtonCorner.CornerRadius = UDim.new(0, 8)
+spectateButtonCorner.Parent = spectateButton
+
+local spectateButtonStroke = Instance.new("UIStroke")
+spectateButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+spectateButtonStroke.Thickness = 1
+spectateButtonStroke.Parent = spectateButton
+
+-- Lista de Clones
+local cloneList = Instance.new("ScrollingFrame")
+cloneList.Size = UDim2.new(0, 60, 0, 40)
+cloneList.Position = UDim2.new(0, 10, 0, 40)
+cloneList.BackgroundTransparency = 1
+cloneList.CanvasSize = UDim2.new(0, 0, 0, 0)
+cloneList.ScrollBarThickness = 4
+cloneList.Visible = false
+cloneList.Parent = spectateFrame
+
+local cloneListLayout = Instance.new("UIListLayout")
+cloneListLayout.FillDirection = Enum.FillDirection.Vertical
+cloneListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+cloneListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+cloneListLayout.Padding = UDim.new(0, 5)
+cloneListLayout.Parent = cloneList
+
+-- Botão Stop Spectate
+local stopSpectateButton = Instance.new("TextButton")
+stopSpectateButton.Size = UDim2.new(0, 50, 0, 50)
+stopSpectateButton.Position = UDim2.new(1, -60, 0, 10)
+stopSpectateButton.BackgroundColor3 = Color3.fromRGB(211, 47, 47)
+stopSpectateButton.Text = "Stop"
+stopSpectateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopSpectateButton.TextScaled = true
+stopSpectateButton.Font = Enum.Font.Gotham
+stopSpectateButton.Visible = false
+stopSpectateButton.Parent = screenGui
+
+local stopSpectateButtonCorner = Instance.new("UICorner")
+stopSpectateButtonCorner.CornerRadius = UDim.new(0, 8)
+stopSpectateButtonCorner.Parent = stopSpectateButton
+
+local stopSpectateButtonStroke = Instance.new("UIStroke")
+stopSpectateButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+stopSpectateButtonStroke.Thickness = 1
+stopSpectateButtonStroke.Parent = stopSpectateButton
 
 -- Variáveis de controle
 local isRecording = false
@@ -278,8 +381,10 @@ local currentReplayCarModel = nil
 local isPaused = false
 local isLooping = false
 local playbackSpeed = 1.0
-local activeReplays = {} -- Tabela para armazenar replays ativos
-local trackedParts = {} -- Tabela para rastrear partes e peças soltas
+local activeReplays = {}
+local trackedParts = {}
+local currentSpectatedClone = nil
+local spectateConnection = nil
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -307,10 +412,8 @@ local function detectDebris(car)
 	local carPosition = car and car.PrimaryPart and car.PrimaryPart.Position or Vector3.new(0, 0, 0)
 	for _, part in pairs(Workspace:GetChildren()) do
 		if part:IsA("BasePart") and part ~= car and not part:IsDescendantOf(car) and not part:IsDescendantOf(tempDebrisFolder) then
-			-- Considerar peças próximas ao carro (ex.: dentro de 50 studs)
 			local distance = (part.Position - carPosition).Magnitude
 			if distance < 50 and not trackedParts[part] then
-				-- Clonar a peça para TempDebris
 				local partClone = part:Clone()
 				partClone.Name = "Debris_" .. #trackedParts
 				partClone.Parent = tempDebrisFolder
@@ -340,7 +443,6 @@ local function recordAllPartsActions()
 
 	local partsData = {}
 	local partIndex = {}
-	-- Gravar partes do carro
 	for _, part in pairs(car:GetDescendants()) do
 		if part:IsA("BasePart") then
 			local partName = part.Name
@@ -353,7 +455,6 @@ local function recordAllPartsActions()
 		end
 	end
 
-	-- Detectar e gravar peças soltas
 	local debrisParts = detectDebris(car)
 	for partClone, _ in pairs(debrisParts) do
 		local uniqueId = "Debris_" .. partClone.Name
@@ -363,7 +464,6 @@ local function recordAllPartsActions()
 		}
 	end
 
-	-- Verificar peças rastreadas para marcar como inativas se desaparecerem
 	for originalPart, partClone in pairs(trackedParts) do
 		if typeof(originalPart) == "Instance" and not originalPart.Parent then
 			local uniqueId = "Debris_" .. partClone.Name
@@ -450,6 +550,9 @@ local function destroyAllClones()
 		end
 	end
 	activeReplays = {}
+	if currentSpectatedClone then
+		stopSpectate()
+	end
 end
 
 -- Função para duplicar o carro e criar clones de peças soltas
@@ -458,7 +561,6 @@ local function duplicateCarAndDebris(carModel, recordedParts)
 		return nil, nil
 	end
 
-	-- Clonar o carro
 	local carCopy = carModel:Clone()
 	local cloneCount = 0
 	local existingClones = {}
@@ -486,7 +588,6 @@ local function duplicateCarAndDebris(carModel, recordedParts)
 	end
 	carCopy.Parent = Workspace
 
-	-- Clonar peças soltas
 	local debrisClones = {}
 	local debrisCloneCount = 0
 	local existingDebrisClones = {}
@@ -504,7 +605,6 @@ local function duplicateCarAndDebris(carModel, recordedParts)
 
 	for uniqueId, _ in pairs(recordedParts) do
 		if uniqueId:match("^Debris_") then
-			-- Encontrar a peça original em TempDebris
 			local debrisName = uniqueId:match("^Debris_(.+)$")
 			local originalDebris = tempDebrisFolder:FindFirstChild(debrisName)
 			if originalDebris then
@@ -522,6 +622,79 @@ local function duplicateCarAndDebris(carModel, recordedParts)
 	return carCopy, debrisClones
 end
 
+-- Função para atualizar a lista de clones
+local function updateCloneList()
+	cloneList:ClearAllChildren()
+	cloneList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	local height = 0
+	for _, replay in pairs(activeReplays) do
+		local cloneName = replay.carCopy.Name
+		local cloneButton = Instance.new("TextButton")
+		cloneButton.Size = UDim2.new(1, -10, 0, 30)
+		cloneButton.BackgroundColor3 = Color3.fromRGB(52, 120, 246)
+		cloneButton.Text = cloneName
+		cloneButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		cloneButton.TextScaled = true
+		cloneButton.Font = Enum.Font.Gotham
+		cloneButton.Parent = cloneList
+
+		local cloneButtonCorner = Instance.new("UICorner")
+		cloneButtonCorner.CornerRadius = UDim.new(0, 6)
+		cloneButtonCorner.Parent = cloneButton
+
+		local cloneButtonStroke = Instance.new("UIStroke")
+		cloneButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+		cloneButtonStroke.Thickness = 1
+		cloneButtonStroke.Parent = cloneButton
+
+		cloneButton.MouseButton1Click:Connect(function()
+			spectateClone(replay.carCopy)
+			cloneList.Visible = false
+		end)
+
+		height = height + 35
+	end
+	cloneList.CanvasSize = UDim2.new(0, 0, 0, height)
+end
+
+-- Função para spectar um clone
+local function spectateClone(clone)
+	if not clone or not clone.Parent then
+		return
+	end
+
+	stopSpectate()
+	currentSpectatedClone = clone
+	Camera.CameraType = Enum.CameraType.Scriptable
+	stopSpectateButton.Visible = true
+
+	spectateConnection = RunService.RenderStepped:Connect(function()
+		if not currentSpectatedClone or not currentSpectatedClone.Parent then
+			stopSpectate()
+			return
+		end
+
+		local primaryPart = currentSpectatedClone.PrimaryPart or currentSpectatedClone:FindFirstChild("Chassis") or currentSpectatedClone:FindFirstChildWhichIsA("BasePart")
+		if primaryPart then
+			local offset = CFrame.new(0, 5, -10)
+			local cameraCFrame = primaryPart.CFrame * offset
+			Camera.CFrame = cameraCFrame
+		end
+	end)
+end
+
+-- Função para parar de spectar
+local function stopSpectate()
+	if spectateConnection then
+		spectateConnection:Disconnect()
+		spectateConnection = nil
+	end
+	currentSpectatedClone = nil
+	Camera.CameraType = Enum.CameraType.Custom
+	Camera.CameraSubject = player.Character and player.Character:FindFirstChild("Humanoid")
+	stopSpectateButton.Visible = false
+end
+
 -- Função para reproduzir as gravações em um clone específico
 local function replayAllPartsActions(recordingsToPlay, carModel)
 	if #recordingsToPlay == 0 then
@@ -531,7 +704,6 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		return
 	end
 
-	-- Obter partes gravadas no primeiro frame para clonar peças soltas
 	local recordedParts = recordingsToPlay[1].parts
 	local carCopy, debrisClones = duplicateCarAndDebris(carModel, recordedParts)
 	if not carCopy then
@@ -577,6 +749,7 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		connection = nil
 	}
 	table.insert(activeReplays, replayData)
+	updateCloneList()
 
 	local function playReplay()
 		replayData.connection = RunService.Heartbeat:Connect(function()
@@ -591,7 +764,6 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 					replayData.startTime = os.clock()
 					replayData.pausedTime = 0
 					adjustedTime = 0
-					-- Restaurar peças soltas para o loop
 					for uniqueId, debrisPart in pairs(replayData.debrisClones) do
 						if not debrisPart.Parent then
 							local debrisName = uniqueId:match("^Debris_(.+)$")
@@ -617,6 +789,10 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 							table.remove(activeReplays, i)
 							break
 						end
+					end
+					updateCloneList()
+					if currentSpectatedClone == carCopy then
+						stopSpectate()
 					end
 					return
 				end
@@ -661,7 +837,6 @@ end)
 -- Conexão do botão Play/Pause
 playPauseButton.MouseButton1Click:Connect(function()
 	if not isRecording then
-		-- Iniciar gravação
 		isRecording = true
 		isPausedRecording = false
 		recordings = {}
@@ -686,7 +861,6 @@ playPauseButton.MouseButton1Click:Connect(function()
 		end)
 		playPauseButton.Text = "⏸"
 	else
-		-- Pausar ou retomar gravação
 		isPausedRecording = not isPausedRecording
 		if isPausedRecording then
 			pausedTime = os.clock() - startTime - elapsedTime
@@ -779,7 +953,6 @@ pauseButton.MouseButton1Click:Connect(function()
 						replay.startTime = os.clock()
 						replay.pausedTime = 0
 						adjustedTime = 0
-						-- Restaurar peças soltas para o loop
 						for uniqueId, debrisPart in pairs(replay.debrisClones) do
 							if not debrisPart.Parent then
 								local debrisName = uniqueId:match("^Debris_(.+)$")
@@ -805,6 +978,10 @@ pauseButton.MouseButton1Click:Connect(function()
 								table.remove(activeReplays, i)
 								break
 							end
+						end
+						updateCloneList()
+						if currentSpectatedClone == carCopy then
+							stopSpectate()
 						end
 						return
 					end
@@ -854,4 +1031,15 @@ slowmotionInput.FocusLost:Connect(function()
 	else
 		slowmotionInput.Text = tostring(playbackSpeed)
 	end
+end)
+
+-- Conexão do botão Spectate
+spectateButton.MouseButton1Click:Connect(function()
+	cloneList.Visible = not cloneList.Visible
+	updateCloneList()
+end)
+
+-- Conexão do botão Stop Spectate
+stopSpectateButton.MouseButton1Click:Connect(function()
+	stopSpectate()
 end)
