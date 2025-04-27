@@ -189,6 +189,28 @@ local function getUniquePartId(part, index)
 	return part.Name .. "_" .. index
 end
 
+-- Função para obter o próximo nome de clone
+local function getNextCloneName()
+	local cloneCount = 0
+	local existingClones = {}
+	for _, obj in pairs(Workspace:GetChildren()) do
+		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") then
+			existingClones[obj.Name] = true
+			if obj.Name:match("^Clone(%d+)$") then
+				local num = tonumber(obj.Name:match("^Clone(%d+)$"))
+				cloneCount = math.max(cloneCount, num + 1)
+			else
+				cloneCount = math.max(cloneCount, 1)
+			end
+		end
+	end
+	if not existingClones["Clone"] and cloneCount == 0 then
+		return "Clone"
+	else
+		return "Clone" .. cloneCount
+	end
+end
+
 -- Função para gravar ações de todas as partes
 local function recordAllPartsActions()
 	local car = getPlayerCar()
@@ -240,7 +262,7 @@ local function duplicateCar()
 	end
 
 	local carCopy = car:Clone()
-	carCopy.Name = "ReplayCar"
+	carCopy.Name = getNextCloneName() -- Definir nome como Clone, Clone1, Clone2, etc.
 	for _, part in pairs(carCopy:GetDescendants()) do
 		if part:IsA("BasePart") then
 			part.Anchored = true -- Ancorrar todas as partes
@@ -251,17 +273,15 @@ local function duplicateCar()
 			part:Destroy() -- Remove controles de física e constraints
 		end
 	end
-	carCopy.Parent = car.Parent
+	carCopy.Parent = Workspace -- Mover para o Workspace
 	return carCopy
 end
 
--- Função para destruir a cópia do carro
-local function destroyReplayCar()
-	local carCollection = Workspace:FindFirstChild("CarCollection")
-	if carCollection then
-		local replayCar = carCollection:FindFirstChild("ReplayCar")
-		if replayCar then
-			replayCar:Destroy()
+-- Função para destruir todas as cópias do carro
+local function destroyAllClones()
+	for _, obj in pairs(Workspace:GetChildren()) do
+		if obj.Name == "Clone" or obj.Name:match("^Clone%d+$") then
+			obj:Destroy()
 		end
 	end
 end
@@ -377,8 +397,8 @@ clearButton.MouseButton1Click:Connect(function()
 		end
 		playButton.Text = "Play"
 	end
-	-- Destruir a cópia do carro
-	destroyReplayCar()
+	-- Destruir todas as cópias do carro
+	destroyAllClones()
 end)
 
 -- Conexão do botão Replay
@@ -389,7 +409,6 @@ replayButton.MouseButton1Click:Connect(function()
 		replayButton.Text = "Replay"
 		return
 	end
-	-- Destruir qualquer cópia existente antes de iniciar um novo replay
-	destroyReplayCar()
+	-- Não destruir clones existentes, apenas criar um novo
 	replayAllPartsActions()
 end)
