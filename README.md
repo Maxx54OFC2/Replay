@@ -184,13 +184,13 @@ local function getPlayerCar()
 	return nil
 end
 
--- Função para encontrar o chassi (VehicleSeat)
-local function getChassis(car)
-	return car and car:FindFirstChild("VehicleSeat", true)
+-- Função para gerar um identificador único para partes
+local function getUniquePartId(part, index)
+	return part.Name .. "_" .. index
 end
 
--- Função para gravar ações do chassi
-local function recordChassisActions()
+-- Função para gravar ações de todas as partes
+local function recordAllPartsActions()
 	local car = getPlayerCar()
 	if not car then
 		playButton.Text = "No Car!"
@@ -203,9 +203,19 @@ local function recordChassisActions()
 		return
 	end
 
-	local chassis = getChassis(car)
-	if not chassis then
-		playButton.Text = "No Chassis!"
+	local partsData = {}
+	local partIndex = {}
+	for _, part in pairs(car:GetDescendants()) do
+		if part:IsA("BasePart") then
+			local partName = part.Name
+			partIndex[partName] = (partIndex[partName] or 0) + 1
+			local uniqueId = getUniquePartId(part, partIndex[partName])
+			partsData[uniqueId] = part.CFrame
+		end
+	end
+
+	if next(partsData) == nil then
+		playButton.Text = "No Parts!"
 		task.wait(1)
 		playButton.Text = isRecording and "Stop" or "Play"
 		isRecording = false
@@ -218,7 +228,7 @@ local function recordChassisActions()
 	local currentTime = tick() - startTime
 	table.insert(recordings, {
 		time = currentTime,
-		cframe = chassis.CFrame
+		parts = partsData
 	})
 end
 
@@ -256,8 +266,8 @@ local function destroyReplayCar()
 	end
 end
 
--- Função para reproduzir as gravações no chassi (ancorado)
-local function replayChassisActions()
+-- Função para reproduzir as gravações em todas as partes (ancorado)
+local function replayAllPartsActions()
 	if #recordings == 0 then
 		replayButton.Text = "No Data!"
 		task.wait(1)
@@ -273,9 +283,20 @@ local function replayChassisActions()
 		return
 	end
 
-	local chassis = getChassis(carCopy)
-	if not chassis then
-		replayButton.Text = "No Chassis!"
+	-- Mapear partes do clone por identificadores únicos
+	local partsMap = {}
+	local partIndex = {}
+	for _, part in pairs(carCopy:GetDescendants()) do
+		if part:IsA("BasePart") then
+			local partName = part.Name
+			partIndex[partName] = (partIndex[partName] or 0) + 1
+			local uniqueId = getUniquePartId(part, partIndex[partName])
+			partsMap[uniqueId] = part
+		end
+	end
+
+	if next(partsMap) == nil then
+		replayButton.Text = "No Parts!"
 		task.wait(1)
 		replayButton.Text = "Replay"
 		carCopy:Destroy()
@@ -304,9 +325,15 @@ local function replayChassisActions()
 		local t = (currentTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
 		t = math.clamp(t, 0, 1)
 
-		-- Interpolar o CFrame do chassi
-		local lerpedCFrame = prevFrame.cframe:Lerp(nextFrame.cframe, t)
-		chassis.CFrame = lerpedCFrame
+		-- Interpolar o CFrame de cada parte
+		for uniqueId, part in pairs(partsMap) do
+			local prevCFrame = prevFrame.parts[uniqueId]
+			local nextCFrame = nextFrame.parts[uniqueId]
+			if prevCFrame and nextCFrame then
+				local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
+				part.CFrame = lerpedCFrame
+			end
+		end
 	end)
 end
 
@@ -325,7 +352,7 @@ playButton.MouseButton1Click:Connect(function()
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
 		heartbeatConnection = RunService.Heartbeat:Connect(function()
-			recordChassisActions()
+			recordAllPartsActions()
 			updateTimeLabel()
 		end)
 		playButton.Text = "Stop"
@@ -364,5 +391,5 @@ replayButton.MouseButton1Click:Connect(function()
 	end
 	-- Destruir qualquer cópia existente antes de iniciar um novo replay
 	destroyReplayCar()
-	replayChassisActions()
+	replayAllPartsActions()
 end)
