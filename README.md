@@ -185,11 +185,28 @@ local function getPlayerCar()
 	return nil
 end
 
+-- Função para encontrar o chassi (VehicleSeat)
+local function getChassis(car)
+	return car and car:FindFirstChild("VehicleSeat", true)
+end
+
 -- Função para gravar ações das rodas
 local function recordWheelActions()
 	local car = getPlayerCar()
 	if not car then
 		playButton.Text = "No Car!"
+		task.wait(1)
+		playButton.Text = isRecording and "Stop" or "Play"
+		isRecording = false
+		if heartbeatConnection then
+			heartbeatConnection:Disconnect()
+		end
+		return
+	end
+
+	local chassis = getChassis(car)
+	if not chassis then
+		playButton.Text = "No Chassis!"
 		task.wait(1)
 		playButton.Text = isRecording and "Stop" or "Play"
 		isRecording = false
@@ -218,8 +235,10 @@ local function recordWheelActions()
 		if wheel then
 			local constraint = wheel:FindFirstChildWhichIsA("CylindricalConstraint") or wheel:FindFirstChildWhichIsA("HingeConstraint")
 			if constraint then
+				-- Gravar CFrame relativo ao chassi
+				local relativeCFrame = chassis.CFrame:ToObjectSpace(wheel.CFrame)
 				wheelData[wheelName] = {
-					cframe = wheel.CFrame,
+					relativeCFrame = relativeCFrame,
 					angularVelocity = constraint.AngularVelocity
 				}
 			else
@@ -273,6 +292,17 @@ local function duplicateCar()
 	return carCopy
 end
 
+-- Função para destruir a cópia do carro
+local function destroyReplayCar()
+	local carCollection = Workspace:FindFirstChild("CarCollection")
+	if carCollection then
+		local replayCar = carCollection:FindFirstChild("ReplayCar")
+		if replayCar then
+			replayCar:Destroy()
+		end
+	end
+end
+
 -- Função para reproduzir as gravações nas rodas
 local function replayWheelActions()
 	if #recordings == 0 then
@@ -287,6 +317,15 @@ local function replayWheelActions()
 		replayButton.Text = "No Car!"
 		task.wait(1)
 		replayButton.Text = "Replay"
+		return
+	end
+
+	local chassis = getChassis(carCopy)
+	if not chassis then
+		replayButton.Text = "No Chassis!"
+		task.wait(1)
+		replayButton.Text = "Replay"
+		carCopy:Destroy()
 		return
 	end
 
@@ -357,9 +396,10 @@ local function replayWheelActions()
 			local prevData = prevFrame.wheelData[wheelName]
 			local nextData = nextFrame.wheelData[wheelName]
 			if prevData and nextData and wheel then
-				local lerpedCFrame = prevData.cframe:Lerp(nextData.cframe, t)
+				-- Interpolar CFrame relativo e aplicar ao espaço mundial
+				local lerpedRelativeCFrame = prevData.relativeCFrame:Lerp(nextData.relativeCFrame, t)
 				local lerpedAngularVelocity = prevData.angularVelocity + (nextData.angularVelocity - prevData.angularVelocity) * t
-				wheel.part.CFrame = lerpedCFrame
+				wheel.part.CFrame = chassis.CFrame * lerpedRelativeCFrame
 				wheel.constraint.AngularVelocity = lerpedAngularVelocity
 			end
 		end
@@ -406,6 +446,8 @@ clearButton.MouseButton1Click:Connect(function()
 		end
 		playButton.Text = "Play"
 	end
+	-- Destruir a cópia do carro
+	destroyReplayCar()
 end)
 
 -- Conexão do botão Replay
@@ -416,5 +458,7 @@ replayButton.MouseButton1Click:Connect(function()
 		replayButton.Text = "Replay"
 		return
 	end
+	-- Destruir qualquer cópia existente antes de iniciar um novo replay
+	destroyReplayCar()
 	replayWheelActions()
 end)
