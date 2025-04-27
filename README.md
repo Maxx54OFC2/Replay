@@ -365,11 +365,31 @@ local function replayWheelActions()
 		return
 	end
 
+	-- Ancorrar o chassi temporariamente
+	chassis.Anchored = true
+
 	-- Posicionar o chassi no CFrame inicial
 	local initialChassisCFrame = recordings[1].chassisCFrame
 	if initialChassisCFrame then
 		chassis.CFrame = initialChassisCFrame
 	end
+
+	-- Posicionar as rodas no primeiro frame
+	local firstFrame = recordings[1]
+	for _, wheelName in ipairs(wheelNames) do
+		local wheel = wheels[wheelName]
+		local wheelData = firstFrame.wheelData[wheelName]
+		if wheel and wheelData then
+			wheel.part.CFrame = chassis.CFrame * wheelData.relativeCFrame
+			wheel.constraint.AngularVelocity = 0 -- Inicializar com 0 para estabilidade
+		end
+	end
+
+	-- Aguardar um frame para estabilizar
+	task.wait()
+
+	-- Liberar o chassi
+	chassis.Anchored = false
 
 	local startReplayTime = tick()
 	local index = 1
@@ -406,6 +426,8 @@ local function replayWheelActions()
 				-- Interpolar CFrame relativo e aplicar ao espaço mundial
 				local lerpedRelativeCFrame = prevData.relativeCFrame:Lerp(nextData.relativeCFrame, t)
 				local lerpedAngularVelocity = prevData.angularVelocity + (nextData.angularVelocity - prevData.angularVelocity) * t
+				-- Limitar AngularVelocity para evitar picos
+				lerpedAngularVelocity = math.clamp(lerpedAngularVelocity, -100, 100)
 				wheel.part.CFrame = chassis.CFrame * lerpedRelativeCFrame
 				wheel.constraint.AngularVelocity = lerpedAngularVelocity
 			end
