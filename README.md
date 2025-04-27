@@ -155,6 +155,7 @@ local startTime = 0
 local elapsedTime = 0
 local heartbeatConnection
 local replayConnection
+local wheelNames = {"FR", "FL", "RL", "RR"}
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -184,8 +185,8 @@ local function getPlayerCar()
 	return nil
 end
 
--- Função para gravar ações do carro
-local function recordCarActions()
+-- Função para gravar ações das rodas
+local function recordWheelActions()
 	local car = getPlayerCar()
 	if not car then
 		playButton.Text = "No Car!"
@@ -198,9 +199,9 @@ local function recordCarActions()
 		return
 	end
 
-	local vehicleSeat = car:FindFirstChild("VehicleSeat", true)
-	if not vehicleSeat then
-		playButton.Text = "No Seat!"
+	local wheelsFolder = car:FindFirstChild("Wheels")
+	if not wheelsFolder then
+		playButton.Text = "No Wheels!"
 		task.wait(1)
 		playButton.Text = isRecording and "Stop" or "Play"
 		isRecording = false
@@ -210,12 +211,42 @@ local function recordCarActions()
 		return
 	end
 
-	local bodyVelocity = car:FindFirstChild("BodyVelocity", true) or { MaxForce = Vector3.new(0, 0, 0), Velocity = Vector3.new(0, 0, 0) }
+	local wheelData = {}
+	local allWheelsFound = true
+	for _, wheelName in ipairs(wheelNames) do
+		local wheel = wheelsFolder:FindFirstChild(wheelName)
+		if wheel then
+			local constraint = wheel:FindFirstChildWhichIsA("CylindricalConstraint") or wheel:FindFirstChildWhichIsA("HingeConstraint")
+			if constraint then
+				wheelData[wheelName] = {
+					cframe = wheel.CFrame,
+					angularVelocity = constraint.AngularVelocity
+				}
+			else
+				allWheelsFound = false
+				break
+			end
+		else
+			allWheelsFound = false
+			break
+		end
+	end
+
+	if not allWheelsFound then
+		playButton.Text = "Invalid Wheels!"
+		task.wait(1)
+		playButton.Text = isRecording and "Stop" or "Play"
+		isRecording = false
+		if heartbeatConnection then
+			heartbeatConnection:Disconnect()
+		end
+		return
+	end
+
 	local currentTime = tick() - startTime
 	table.insert(recordings, {
 		time = currentTime,
-		cframe = vehicleSeat.CFrame,
-		velocity = bodyVelocity.Velocity
+		wheelData = wheelData
 	})
 end
 
@@ -242,8 +273,8 @@ local function duplicateCar()
 	return carCopy
 end
 
--- Função para reproduzir as gravações
-local function replayCarActions()
+-- Função para reproduzir as gravações nas rodas
+local function replayWheelActions()
 	if #recordings == 0 then
 		replayButton.Text = "No Data!"
 		task.wait(1)
@@ -259,9 +290,35 @@ local function replayCarActions()
 		return
 	end
 
-	local vehicleSeat = carCopy:FindFirstChild("VehicleSeat", true)
-	if not vehicleSeat then
-		replayButton.Text = "No Seat!"
+	local wheelsFolder = carCopy:FindFirstChild("Wheels")
+	if not wheelsFolder then
+		replayButton.Text = "No Wheels!"
+		task.wait(1)
+		replayButton.Text = "Replay"
+		carCopy:Destroy()
+		return
+	end
+
+	local wheels = {}
+	local allWheelsFound = true
+	for _, wheelName in ipairs(wheelNames) do
+		local wheel = wheelsFolder:FindFirstChild(wheelName)
+		if wheel then
+			local constraint = wheel:FindFirstChildWhichIsA("CylindricalConstraint") or wheel:FindFirstChildWhichIsA("HingeConstraint")
+			if constraint then
+				wheels[wheelName] = { part = wheel, constraint = constraint }
+			else
+				allWheelsFound = false
+				break
+			end
+		else
+			allWheelsFound = false
+			break
+		end
+	end
+
+	if not allWheelsFound then
+		replayButton.Text = "Invalid Wheels!"
 		task.wait(1)
 		replayButton.Text = "Replay"
 		carCopy:Destroy()
@@ -295,13 +352,15 @@ local function replayCarActions()
 		local t = (currentTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
 		t = math.clamp(t, 0, 1)
 
-		local lerpedCFrame = prevFrame.cframe:Lerp(nextFrame.cframe, t)
-		local lerpedVelocity = prevFrame.velocity:Lerp(nextFrame.velocity, t)
-
-		vehicleSeat.CFrame = lerpedCFrame
-		for _, part in pairs(carCopy:GetDescendants()) do
-			if part:IsA("BasePart") and part ~= vehicleSeat then
-				part.Velocity = lerpedVelocity
+		for _, wheelName in ipairs(wheelNames) do
+			local wheel = wheels[wheelName]
+			local prevData = prevFrame.wheelData[wheelName]
+			local nextData = nextFrame.wheelData[wheelName]
+			if prevData and nextData and wheel then
+				local lerpedCFrame = prevData.cframe:Lerp(nextData.cframe, t)
+				local lerpedAngularVelocity = prevData.angularVelocity + (nextData.angularVelocity - prevData.angularVelocity) * t
+				wheel.part.CFrame = lerpedCFrame
+				wheel.constraint.AngularVelocity = lerpedAngularVelocity
 			end
 		end
 	end)
@@ -322,7 +381,7 @@ playButton.MouseButton1Click:Connect(function()
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
 		heartbeatConnection = RunService.Heartbeat:Connect(function()
-			recordCarActions()
+			recordWheelActions()
 			updateTimeLabel()
 		end)
 		playButton.Text = "Stop"
@@ -357,5 +416,5 @@ replayButton.MouseButton1Click:Connect(function()
 		replayButton.Text = "Replay"
 		return
 	end
-	replayCarActions()
+	replayWheelActions()
 end)
