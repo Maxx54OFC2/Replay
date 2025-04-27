@@ -43,45 +43,6 @@ mainButtonTextStroke.Color = Color3.fromRGB(25, 45, 58)
 mainButtonTextStroke.Thickness = 1
 mainButtonTextStroke.Parent = mainButton
 
--- Criar Frame do Menu Principal
-local mainMenuFrame = Instance.new("Frame")
-mainMenuFrame.Size = UDim2.new(0, 200, 0, 60)
-mainMenuFrame.Position = UDim2.new(0.1, 60, 0, 10)
-mainMenuFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainMenuFrame.Visible = false
-mainMenuFrame.Active = true
-mainMenuFrame.Draggable = true
-mainMenuFrame.Parent = screenGui
-
-local mainMenuFrameCorner = Instance.new("UICorner")
-mainMenuFrameCorner.CornerRadius = UDim.new(0, 12)
-mainMenuFrameCorner.Parent = mainMenuFrame
-
-local mainMenuFrameStroke = Instance.new("UIStroke")
-mainMenuFrameStroke.Color = Color3.fromRGB(88, 137, 192)
-mainMenuFrameStroke.Thickness = 1
-mainMenuFrameStroke.Parent = mainMenuFrame
-
--- Botão para abrir o menu Recording
-local recordingMenuButton = Instance.new("TextButton")
-recordingMenuButton.Size = UDim2.new(0, 160, 0, 40)
-recordingMenuButton.Position = UDim2.new(0, 20, 0, 10)
-recordingMenuButton.BackgroundColor3 = Color3.fromRGB(88, 137, 192)
-recordingMenuButton.Text = "Recording"
-recordingMenuButton.TextColor3 = Color3.fromRGB(25, 45, 58)
-recordingMenuButton.TextScaled = true
-recordingMenuButton.Font = Enum.Font.SourceSansBold
-recordingMenuButton.Parent = mainMenuFrame
-
-local DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D = Instance.new("UICorner")
-DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.CornerRadius = UDim.new(0, 8)
-DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Parent = recordingMenuButton
-
-local DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D = Instance.new("UIStroke")
-DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Color = Color3.fromRGB(255, 255, 255)
-DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Thickness = 1
-DgS8eVBC3JeQLoBcxkZ1i36hMuQ1NQwtS3CqLFsU8j8D.Parent = recordingMenuButton
-
 -- Criar Frame do Menu Recording
 local recordingFrame = Instance.new("Frame")
 recordingFrame.Size = UDim2.new(0, 350, 0, 350)
@@ -279,16 +240,11 @@ local recordings = {}
 local startTime = 0
 local elapsedTime = 0
 local heartbeatConnection
-local replayConnection
 local currentReplayCarModel = nil
 local isPaused = false
 local isLooping = false
 local playbackSpeed = 1.0
-local currentReplayData = nil
-local currentCarModel = nil
-local currentReplayStartTime = 0
-local currentReplayIndex = 1
-local pausedTime = 0
+local activeReplays = {} -- Tabela para armazenar replays ativos
 
 -- Função para formatar o tempo (MM:SS:MMM)
 local function formatTime(timeInSeconds)
@@ -404,6 +360,12 @@ local function destroyAllClones()
 			obj:Destroy()
 		end
 	end
+	for _, replay in pairs(activeReplays) do
+		if replay.connection then
+			replay.connection:Disconnect()
+		end
+	end
+	activeReplays = {}
 end
 
 -- Função para duplicar o carro (para replays)
@@ -441,7 +403,7 @@ local function duplicateCar(carModel)
 	return carCopy
 end
 
--- Função para reproduzir as gravações em todas as partes (ancorado)
+-- Função para reproduzir as gravações em um clone específico
 local function replayAllPartsActions(recordingsToPlay, carModel)
 	if #recordingsToPlay == 0 then
 		replayButton.Text = "No Data!"
@@ -477,50 +439,55 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		return
 	end
 
-	currentReplayData = recordingsToPlay
-	currentCarModel = carModel
-	currentReplayStartTime = os.clock()
-	currentReplayIndex = 1
-	isPaused = false
-	pauseButton.Text = "Pause"
-	pausedTime = 0
+	local replayData = {
+		carCopy = carCopy,
+		partsMap = partsMap,
+		recordings = recordingsToPlay,
+		startTime = os.clock(),
+		currentIndex = 1,
+		pausedTime = 0,
+		connection = nil
+	}
+	table.insert(activeReplays, replayData)
 
 	local function playReplay()
-		if replayConnection then
-			replayConnection:Disconnect()
-			replayConnection = nil
-		end
-		replayConnection = RunService.Heartbeat:Connect(function()
+		replayData.connection = RunService.Heartbeat:Connect(function()
 			if isPaused then
 				return
 			end
 
-			local adjustedTime = (os.clock() - currentReplayStartTime - pausedTime) * playbackSpeed
-			if currentReplayIndex > #recordingsToPlay then
+			local adjustedTime = (os.clock() - replayData.startTime - replayData.pausedTime) * playbackSpeed
+			if replayData.currentIndex > #recordingsToPlay then
 				if isLooping then
-					currentReplayIndex = 1
-					currentReplayStartTime = os.clock()
-					pausedTime = 0
+					replayData.currentIndex = 1
+					replayData.startTime = os.clock()
+					replayData.pausedTime = 0
 					adjustedTime = 0
 				else
-					if replayConnection then
-						replayConnection:Disconnect()
-						replayConnection = nil
+					if replayData.connection then
+						replayData.connection:Disconnect()
+						replayData.connection = nil
+					end
+					for i, activeReplay in ipairs(activeReplays) do
+						if activeReplay == replayData then
+							table.remove(activeReplays, i)
+							break
+						end
 					end
 					return
 				end
 			end
 
-			while currentReplayIndex <= #recordingsToPlay and recordingsToPlay[currentReplayIndex].time <= adjustedTime do
-				currentReplayIndex = currentReplayIndex + 1
+			while replayData.currentIndex <= #recordingsToPlay and recordingsToPlay[replayData.currentIndex].time <= adjustedTime do
+				replayData.currentIndex = replayData.currentIndex + 1
 			end
 
-			local prevFrame = recordingsToPlay[math.max(1, currentReplayIndex - 1)]
-			local nextFrame = recordingsToPlay[currentReplayIndex] or prevFrame
+			local prevFrame = recordingsToPlay[math.max(1, replayData.currentIndex - 1)]
+			local nextFrame = recordingsToPlay[replayData.currentIndex] or prevFrame
 			local t = nextFrame.time == prevFrame.time and 1 or (adjustedTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
 			t = math.clamp(t, 0, 1)
 
-			for uniqueId, part in pairs(partsMap) do
+			for uniqueId, part in pairs(replayData.partsMap) do
 				local prevCFrame = prevFrame.parts[uniqueId]
 				local nextCFrame = nextFrame.parts[uniqueId]
 				if prevCFrame and nextCFrame then
@@ -536,14 +503,7 @@ end
 
 -- Conexão do botão principal
 mainButton.MouseButton1Click:Connect(function()
-	mainMenuFrame.Visible = not mainMenuFrame.Visible
-	recordingFrame.Visible = false
-end)
-
--- Conexão do botão Recording Menu
-recordingMenuButton.MouseButton1Click:Connect(function()
-	mainMenuFrame.Visible = false
-	recordingFrame.Visible = true
+	recordingFrame.Visible = not recordingFrame.Visible
 end)
 
 -- Conexão do botão Play
@@ -605,10 +565,6 @@ replayButton.MouseButton1Click:Connect(function()
 		return
 	end
 	if currentReplayCarModel and #recordings > 0 then
-		currentReplayData = recordings
-		currentCarModel = currentReplayCarModel
-		isPaused = false
-		pauseButton.Text = "Pause"
 		replayAllPartsActions(recordings, currentReplayCarModel)
 	end
 end)
@@ -620,18 +576,67 @@ end)
 
 -- Conexão do botão Pause
 pauseButton.MouseButton1Click:Connect(function()
-	if currentReplayData and currentCarModel then
-		isPaused = not isPaused
-		pauseButton.Text = isPaused and "Resume" or "Pause"
-		if isPaused then
-			if replayConnection then
-				pausedTime = os.clock() - currentReplayStartTime
-				replayConnection:Disconnect()
-				replayConnection = nil
+	isPaused = not isPaused
+	pauseButton.Text = isPaused and "Resume" or "Pause"
+	if isPaused then
+		for _, replay in pairs(activeReplays) do
+			if replay.connection then
+				replay.pausedTime = os.clock() - replay.startTime
+				replay.connection:Disconnect()
+				replay.connection = nil
 			end
-		else
-			currentReplayStartTime = os.clock() - pausedTime
-			replayAllPartsActions(currentReplayData, currentCarModel)
+		end
+	else
+		for _, replay in pairs(activeReplays) do
+			replay.startTime = os.clock() - replay.pausedTime
+			local recordingsToPlay = replay.recordings
+			local partsMap = replay.partsMap
+			local carCopy = replay.carCopy
+			replay.connection = RunService.Heartbeat:Connect(function()
+				if isPaused then
+					return
+				end
+
+				local adjustedTime = (os.clock() - replay.startTime - replay.pausedTime) * playbackSpeed
+				if replay.currentIndex > #recordingsToPlay then
+					if isLooping then
+						replay.currentIndex = 1
+						replay.startTime = os.clock()
+						replay.pausedTime = 0
+						adjustedTime = 0
+					else
+						if replay.connection then
+							replay.connection:Disconnect()
+							replay.connection = nil
+						end
+						for i, activeReplay in ipairs(activeReplays) do
+							if activeReplay == replay then
+								table.remove(activeReplays, i)
+								break
+							end
+						end
+						return
+					end
+				end
+
+				while replay.currentIndex <= #recordingsToPlay and recordingsToPlay[replay.currentIndex].time <= adjustedTime do
+					replay.currentIndex = replay.currentIndex + 1
+				end
+
+				local prevFrame = recordingsToPlay[math.max(1, replay.currentIndex - 1)]
+				local nextFrame = recordingsToPlay[replay.currentIndex] or prevFrame
+				local t = nextFrame.time == prevFrame.time and 1 or (adjustedTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
+				t = math.clamp(t, 0, 1)
+
+				for uniqueId, part in pairs(partsMap) do
+					local prevCFrame = prevFrame.parts[uniqueId]
+					local nextCFrame = nextFrame.parts[uniqueId]
+					if prevCFrame and nextCFrame then
+						local lerpedCFrame = prevCFrame:Lerp(nextCFrame, t)
+						part.CFrame = lerpedCFrame
+					end
+				end
+			end)
 		end
 	end
 end)
