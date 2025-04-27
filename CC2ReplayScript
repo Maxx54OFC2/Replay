@@ -104,7 +104,7 @@ replaysMenuButtonStroke.Parent = replaysMenuButton
 
 -- Criar Frame do Menu Recording
 local recordingFrame = Instance.new("Frame")
-recordingFrame.Size = UDim2.new(0, 350, 0, 350)
+recordingFrame.Size = UDim2.new(0, 350, 0, 400)
 recordingFrame.Position = UDim2.new(0.1, 60, 0, 10)
 recordingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 recordingFrame.Visible = false
@@ -477,14 +477,6 @@ local function formatTime(timeInSeconds)
 	return string.format("%02d:%02d:%03d", minutes, seconds, milliseconds)
 end
 
--- Função para atualizar o contador de tempo
-local function updateTimeLabel()
-	if isRecording then
-		elapsedTime = tick() - startTime
-		timeLabel.Text = formatTime(elapsedTime)
-	end
-end
-
 -- Função para encontrar o carro do jogador
 local function getPlayerCar()
 	local carCollection = Workspace:FindFirstChild("CarCollection")
@@ -497,9 +489,56 @@ local function getPlayerCar()
 	return nil
 end
 
--- Função para gerar um identificador único para partes
-local function getUniquePartId(part, index)
-	return part.Name .. "_" .. index
+-- Função para gravar ações de todas as partes
+local function recordAllPartsActions()
+	local car = getPlayerCar()
+	if not car then
+		playButton.Text = "No Car!"
+		task.wait(1)
+		playButton.Text = isRecording and "Stop" or "Play"
+		isRecording = false
+		if heartbeatConnection then
+			heartbeatConnection:Disconnect()
+		end
+		return false
+	end
+
+	local partsData = {}
+	local partIndex = {}
+	for _, part in pairs(car:GetDescendants()) do
+		if part:IsA("BasePart") then
+			local partName = part.Name
+			partIndex[partName] = (partIndex[partName] or 0) + 1
+			local uniqueId = partName .. "_" .. partIndex[partName]
+			partsData[uniqueId] = part.CFrame
+		end
+	end
+
+	if next(partsData) == nil then
+		playButton.Text = "No Parts!"
+		task.wait(1)
+		playButton.Text = isRecording and "Stop" or "Play"
+		isRecording = false
+		if heartbeatConnection then
+			heartbeatConnection:Disconnect()
+		end
+		return false
+	end
+
+	local currentTime = os.clock() - startTime
+	table.insert(recordings, {
+		time = currentTime,
+		parts = partsData
+	})
+	return true
+end
+
+-- Função para atualizar o cronômetro
+local function updateTimeLabel()
+	if isRecording then
+		elapsedTime = os.clock() - startTime
+		timeLabel.Text = formatTime(elapsedTime)
+	end
 end
 
 -- Função para obter o próximo nome de ReplayCar
@@ -654,7 +693,7 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 		if part:IsA("BasePart") then
 			local partName = part.Name
 			partIndex[partName] = (partIndex[partName] or 0) + 1
-			local uniqueId = getUniquePartId(part, partIndex[partName])
+			local uniqueId = partName .. "_" .. partIndex[partName]
 			partsMap[uniqueId] = part
 		end
 	end
@@ -669,7 +708,7 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 
 	currentReplayData = recordingsToPlay
 	currentCarModel = carModel
-	currentReplayStartTime = tick()
+	currentReplayStartTime = os.clock()
 	currentReplayIndex = 1
 	isPaused = false
 	pauseButton.Text = "Pause"
@@ -680,11 +719,11 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 				return
 			end
 
-			local adjustedTime = (tick() - currentReplayStartTime - pausedTime) * playbackSpeed
+			local adjustedTime = (os.clock() - currentReplayStartTime - pausedTime) * playbackSpeed
 			if currentReplayIndex > #recordingsToPlay then
 				if isLooping then
 					currentReplayIndex = 1
-					currentReplayStartTime = tick() - pausedTime / playbackSpeed
+					currentReplayStartTime = os.clock() - pausedTime / playbackSpeed
 					adjustedTime = 0
 				else
 					if replayConnection then
@@ -700,7 +739,7 @@ local function replayAllPartsActions(recordingsToPlay, carModel)
 
 			local prevFrame = recordingsToPlay[math.max(1, currentReplayIndex - 1)]
 			local nextFrame = recordingsToPlay[currentReplayIndex] or prevFrame
-			local t = (adjustedTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
+			local t = nextFrame.time == prevFrame.time and 1 or (adjustedTime - prevFrame.time) / (nextFrame.time - prevFrame.time)
 			t = math.clamp(t, 0, 1)
 
 			for uniqueId, part in pairs(partsMap) do
@@ -748,7 +787,7 @@ playButton.MouseButton1Click:Connect(function()
 	if isRecording then
 		-- Iniciar gravação
 		recordings = {}
-		startTime = tick()
+		startTime = os.clock()
 		elapsedTime = 0
 		timeLabel.Text = "00:00:000"
 		currentReplayCarModel = saveCarModel()
@@ -760,14 +799,16 @@ playButton.MouseButton1Click:Connect(function()
 			return
 		end
 		heartbeatConnection = RunService.Heartbeat:Connect(function()
-			recordAllPartsActions()
-			updateTimeLabel()
+			if recordAllPartsActions() then
+				updateTimeLabel()
+			end
 		end)
 		playButton.Text = "Stop"
 	else
 		-- Parar gravação
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
+			heartbeatConnection = nil
 		end
 		playButton.Text = "Play"
 		if #recordings > 0 then
@@ -785,6 +826,7 @@ clearButton.MouseButton1Click:Connect(function()
 		isRecording = false
 		if heartbeatConnection then
 			heartbeatConnection:Disconnect()
+			heartbeatConnection = nil
 		end
 		playButton.Text = "Play"
 	end
@@ -828,11 +870,12 @@ pauseButton.MouseButton1Click:Connect(function()
 		pauseButton.Text = isPaused and "Resume" or "Pause"
 		if isPaused then
 			if replayConnection then
-				pausedTime = tick() - currentReplayStartTime
+				pausedTime = os.clock() - currentReplayStartTime
 				replayConnection:Disconnect()
+				replayConnection = nil
 			end
 		else
-			currentReplayStartTime = tick() - pausedTime
+			currentReplayStartTime = os.clock() - pausedTime
 			replayAllPartsActions(currentReplayData, currentCarModel)
 		end
 	end
